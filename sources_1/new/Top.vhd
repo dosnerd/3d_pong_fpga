@@ -45,13 +45,13 @@ entity Top is
     vSync2 : out STD_LOGIC;
     vgaRed2 : out STD_LOGIC_VECTOR(3 downto 0);
     vgaGreen2 : out STD_LOGIC_VECTOR(3 downto 0);
-    vgaBlue2 : out STD_LOGIC_VECTOR(3 downto 0);
+    vgaBlue2 : out STD_LOGIC_VECTOR(3 downto 0)
     
     --debug
-    reset : in STD_LOGIC;
-    spriteColor : in STD_LOGIC_VECTOR (12 downto 0);
-    pixelOut : out STD_LOGIC_VECTOR (11 downto 0);
-    spriteAddr : out STD_LOGIC_VECTOR (2 downto 0)
+--    reset : in STD_LOGIC;
+--    spriteColor : in STD_LOGIC_VECTOR (12 downto 0);
+--    pixelOut : out STD_LOGIC_VECTOR (11 downto 0);
+--    spriteAddr : out STD_LOGIC_VECTOR (2 downto 0)
     
   );
 end Top;
@@ -80,6 +80,7 @@ architecture Behavioral of Top is
     component clk100_to_25 is
         Port (
                clk_out1 : out STD_LOGIC;
+               clk_out2 : out STD_LOGIC;
                clk_in1 : in STD_LOGIC
         );
     end component;
@@ -96,26 +97,29 @@ architecture Behavioral of Top is
     end component;
 
     SIGNAL clk25 : STD_LOGIC;
+    SIGNAL clk200 : STD_LOGIC;
     
     SIGNAL VGAaddressLeft : STD_LOGIC_VECTOR(19 downto 0);
     SIGNAL VGApixelLeft : STD_LOGIC_VECTOR (11 downto 0);
     SIGNAl spriteColorLeft : STD_LOGIC_VECTOR (12 downto 0);
     SIGNAL spriteAddressLeft : STD_LOGIC_VECTOR (2 downto 0);
     SIGNAL resetPixelLeft : STD_LOGIC := '1';
-
+    
     SIGNAL VGAaddressRight : STD_LOGIC_VECTOR(19 downto 0);
     SIGNAL VGApixelRight : STD_LOGIC_VECTOR (11 downto 0);
     SIGNAl spriteColorRight : STD_LOGIC_VECTOR (12 downto 0);
     SIGNAL spriteAddressRight : STD_LOGIC_VECTOR (2 downto 0);
     SIGNAL resetPixelRight : STD_LOGIC := '1';
 begin
+
 clk_div1: clk100_to_25 PORT MAP (
     clk_in1 => clk100,
-    clk_out1 => clk25
+    clk_out1 => clk25,
+    clk_out2 => clk200
 );
 
 ram: ram_controller PORT MAP (
-    clk => clk100,  --TODO: maybe set on 200 MHz
+    clk => clk200,
     VGAleft => VGAaddressLeft,
     VGAright => VGAaddressRight,
     addr_left => spriteAddressLeft,
@@ -134,7 +138,7 @@ PSleft: PixelSelect PORT MAP (
     clk100 => clk100,
     pixelOut => VGApixelLeft,
     spriteAddr => spriteAddressLeft,
-    reset => resetPixelLeft
+    reset => clk25
 
 --debug
 --    spriteColor => spriteColor,
@@ -150,7 +154,7 @@ VGAleft: VGA_controller PORT MAP (
     set_rgb(7 downto 4) => vgaGreen, 
     set_rgb(11 downto 8) => vgaBlue, 
     hsync => Hsync,
-    vsync => Vsync,
+    vsync => vSync,
     position_x => VGAaddressLeft(9 downto 0),
     position_y => VGAaddressLeft(19 downto 10)
 );
@@ -160,7 +164,7 @@ PSright: PixelSelect PORT MAP (
     --VGAy => VGAaddressRight(19 downto 10),
     spriteColor => spriteColorRight,
     clk100 => clk100,
-    reset => resetPixelRight,
+    reset => clk25,
     pixelOut => VGApixelRight,
     spriteAddr => spriteAddressRight
 );
@@ -172,7 +176,7 @@ VGAright: VGA_controller PORT MAP (
     set_rgb(7 downto 4) => vgaGreen2, 
     set_rgb(11 downto 8) => vgaBlue2, 
     hsync => Hsync2,
-    vsync => Vsync2,
+    vsync => vSync2,
     position_x => VGAaddressRight(9 downto 0),
     position_y => VGAaddressRight(19 downto 10)
 );

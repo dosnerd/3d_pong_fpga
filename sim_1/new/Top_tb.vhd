@@ -52,27 +52,23 @@ architecture Behavioral of Top_tb is
         vSync2 : out STD_LOGIC;
         vgaRed2 : out STD_LOGIC_VECTOR(3 downto 0);
         vgaGreen2 : out STD_LOGIC_VECTOR(3 downto 0);
-        vgaBlue2 : out STD_LOGIC_VECTOR(3 downto 0);
+        vgaBlue2 : out STD_LOGIC_VECTOR(3 downto 0)
         
         --debug
-        spriteColor : in STD_LOGIC_VECTOR (12 downto 0);
-        pixelOut : out STD_LOGIC_VECTOR (11 downto 0);
-        reset : in STD_LOGIC;
-        spriteAddr : out STD_LOGIC_VECTOR (2 downto 0)
+--        spriteColor : in STD_LOGIC_VECTOR (12 downto 0);
+--        pixelOut : out STD_LOGIC_VECTOR (11 downto 0);
+--        reset : in STD_LOGIC;
+--        spriteAddr : out STD_LOGIC_VECTOR (2 downto 0)
       );
     end component;
     
-    SIGNAL clock : STD_LOGIC := '0';
-    SIGNAL reset: STD_LOGIC := '1';
-    SIGNAL spriteColor : STD_LOGIC_VECTOR (12 downto 0);
-    SIGNAL counter : STD_LOGIC_VECTOR(5 downto 0) := (others => '0');
-    
+    SIGNAL clock : STD_LOGIC := '0';    
 begin
 
 test: top port map(
-    clk100 => clock,
-    spriteColor => spriteColor,
-    reset => reset
+    clk100 => clock
+--    spriteColor => spriteColor,
+--    reset => reset
 );
 
 clock_gen: process
@@ -84,21 +80,6 @@ begin
 end process;
 
 debug: process(clock)
-begin
-        
-    spriteColor <=
-            (12 => '1',
-            others => '0');
-    
-    spriteColor(5 downto 0) <= counter;
-    counter <= counter + 1;
-    
-    if counter = 15 then
-        reset <= '1';
-        counter <= (others => '0');
-    elsif counter = 3 then
-        reset <= '0';
-    end if;
-        
+begin        
 end process;
 end Behavioral;

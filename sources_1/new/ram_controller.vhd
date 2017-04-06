@@ -57,10 +57,10 @@ architecture Behavioral of ram_controller is
     end component;
     
     --SIGNAL clk_mod : STD_LOGIC := '0';
-    SIGNAL select_mod: STD_LOGIC_vector(6 downto 0);
-    SIGNAL pos_mod: STD_LOGIC_vector(19 downto 0);
+    SIGNAL select_mod : STD_LOGIC_vector(6 downto 0) := (others => '0');
+    SIGNAL pos_mod : STD_LOGIC_vector(19 downto 0) := (others => '0');
     --SIGNAL mod_address: STD_LOGIC_vector(19 downto 0);
-    SIGNAL color_mod: STD_LOGIC_vector(12 downto 0);
+    SIGNAL color_mod : STD_LOGIC_vector(12 downto 0) := (others => '0');
 begin
 
 test: ram_module PORT MAP(
@@ -74,6 +74,9 @@ test: ram_module PORT MAP(
 
 pos_mod <= VGAleft WHEN clk = '0' ELSE
            VGAright;
+           
+data_left   <=    color_mod WHEN clk = '0';
+data_right  <=    color_mod WHEN clk = '1';
            
 --mod_address <=  addr_left WHEN clk = '0' ELSE
 --                addr_right;

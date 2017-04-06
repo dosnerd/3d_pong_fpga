@@ -44,42 +44,69 @@ entity PixelSelect is
 end PixelSelect;
 
 architecture Behavioral of PixelSelect is
-    SIGNAl temp : STD_LOGIC_VECTOR (11 downto 0) := (others => '0');
+    SIGNAL debug1 : STD_LOGIC_VECTOR (11 downto 0) := (others => '0');
+    SIGNAL debug2 : STD_LOGIC_VECTOR (11 downto 0) := (others => '0');
 begin
 
 process (clk100)
-    variable i : integer range 0 to 8 := 0;
+    variable i : integer range -1 to 8 := 0;
     variable color : STD_LOGIC_VECTOR (11 downto 0) := (others => '0');
+    variable reset_c : STD_LOGIC;
 begin
-    --temp(10 downto 0) <= spriteColor(10 downto 0);
-    --temp(11) <= reset;
-    if reset = '1' then
+    debug1 <= color;
+    if reset = '1' and reset_c = '0' then
         i := 0;
-    elsif (i < 7) then
-        --when no sprite drawed, no division;
-        if (color = 0 and spriteColor(12) = '0')then
-            color := spriteColor(11 downto 0);
-        else
-            --devide to 2
-            color := '0' & color(10 downto 0);
-            color := color + ('0' & spriteColor(11 downto 1));
-            --color := ('0' & spriteColor(11 downto 1));
-        end if;
-        
-        --when solid sprite, exit
-        if spriteColor(12) = '0' then
-            i := 6;
-        end if;
-        
-        i := i + 1;
-        spriteAddr <= std_logic_vector(to_unsigned(i, 3));   
-    elsif (i = 7) then
-        pixelOut <= color;
-        i := i + 1;
-        spriteAddr <= (others => '0');
+        color := (others => '0');
+        reset_c := '1';
+    elsif reset = '0' and reset_c = '1' then
+        reset_c := '0';
     end if;
+   
+--   pixelOut <= (others=>'1');
     
-        temp <= color;
+--    if rising_edge(reset) then
+--        i := 0;
+--        color := (others => '0');
+--    elsif (falling_edge(reset)) then
+--        --ignore falling edge reset
+--    else
+        if (i < 7) then
+            if (i > 0) then
+                --when no sprite drawed, no division;
+                if (color = 0 and spriteColor(12) = '0')then
+                    color := spriteColor(11 downto 0);
+                else
+                    --devide every color by 2
+                    color(11 downto 8) := '0' & color(11 downto 9);
+                    color(7 downto 4) := '0' & color(7 downto 5);
+                    color(3 downto 0) := '0' & color(3 downto 1);
+                    
+                    color(11 downto 8) := color(11 downto 8) + ('0' & spriteColor(11 downto 9));
+                    color(7 downto 4) := color(7 downto 4) + ('0' & spriteColor(7 downto 5));
+                    color(3 downto 0) := color(3 downto 0) + ('0' & spriteColor(3 downto 1));
+                    
+                    --color := color + ('0' & spriteColor(11 downto 1));
+                    --color := ('0' & spriteColor(11 downto 1));
+                end if;
+
+--                color := (others => '1');
+                
+                --when solid sprite, exit
+                if spriteColor(12) = '0' then
+                    i := 6;
+                end if;
+            end if;
+            
+            i := i + 1;
+            spriteAddr <= std_logic_vector(to_unsigned(i, 3));   
+        elsif (i = 7) then
+            pixelOut <= color;
+            i := i + 1;
+            spriteAddr <= (others => '0');
+        end if;
+--    end if;
+    
+    debug2 <= color;
 end process;
 
 end Behavioral;
