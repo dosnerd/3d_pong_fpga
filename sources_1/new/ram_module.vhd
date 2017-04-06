@@ -46,7 +46,7 @@ begin
 
 process (clk)
 begin
-    if (rising_edge(clk) then
+    if (rising_edge(clk)) then
     
     end if;
 end process;
