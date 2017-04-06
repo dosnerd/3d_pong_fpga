@@ -32,7 +32,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity ram_module is
-    Port ( clk : in STD_LOGIC;               --on rising edge, give color of current position. (USE ONLY 1 TICK, NOT MORE)
+    Port ( clk : in STD_LOGIC;               --on both edges
            ss : in STD_LOGIC;                --high active
            write : in STD_LOGIC;             --low active!!
            screen_left : in STD_LOGIC;       --low, data for left screen, high data for right screen
@@ -46,9 +46,16 @@ begin
 
 process (clk)
 begin
-    if (rising_edge(clk)) then
+    --DO NOT USE THE FOLOW LINE
+    --if (rising_edge(clk)) then end if;
+    --without the above line, the process will excecute on both edges, not only the rising/falling edge.
     
-    end if;
+    
+    ------------------------------------------here come your code------------------------------------------
+    --
+    --
+    -------------------------------------------------------------------------------------------------------
+    
 end process;
 
 end Behavioral;
