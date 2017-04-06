@@ -21,7 +21,8 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-USE ieee.numeric_std.ALL;
+use IEEE.NUMERIC_STD.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -33,28 +34,52 @@ USE ieee.numeric_std.ALL;
 --use UNISIM.VComponents.all;
 
 entity PixelSelect is
-    Port ( VGAx : in STD_LOGIC_VECTOR (9 downto 0);
-           VGAy : in STD_LOGIC_VECTOR (9 downto 0);
-           spriteColor : in STD_LOGIC_VECTOR (15 downto 0);
+    Port ( --VGAx : in STD_LOGIC_VECTOR (9 downto 0);
+           --VGAy : in STD_LOGIC_VECTOR (9 downto 0);
+           spriteColor : in STD_LOGIC_VECTOR (12 downto 0);
            clk100 : in STD_LOGIC;
+           reset : in STD_LOGIC;
            pixelOut : out STD_LOGIC_VECTOR (11 downto 0);
            spriteAddr : out STD_LOGIC_VECTOR (2 downto 0));
 end PixelSelect;
 
 architecture Behavioral of PixelSelect is
-
+    SIGNAl temp : STD_LOGIC_VECTOR (11 downto 0) := (others => '0');
 begin
 
 process (clk100)
-    variable i : integer range 0 to 5 := 0;
-    variable color : integer := 0;
+    variable i : integer range 0 to 8 := 0;
+    variable color : STD_LOGIC_VECTOR (11 downto 0) := (others => '0');
 begin
-    if (rising_edge(clk100)) then
-        if (i < 3) then
-            spriteAddr <= std_logic_vector(to_unsigned(i, 3));
-            i := i + 1;
+    --temp(10 downto 0) <= spriteColor(10 downto 0);
+    --temp(11) <= reset;
+    if reset = '1' then
+        i := 0;
+    elsif (i < 7) then
+        --when no sprite drawed, no division;
+        if (color = 0 and spriteColor(12) = '0')then
+            color := spriteColor(11 downto 0);
+        else
+            --devide to 2
+            color := '0' & color(10 downto 0);
+            color := color + ('0' & spriteColor(11 downto 1));
+            --color := ('0' & spriteColor(11 downto 1));
         end if;
+        
+        --when solid sprite, exit
+        if spriteColor(12) = '0' then
+            i := 6;
+        end if;
+        
+        i := i + 1;
+        spriteAddr <= std_logic_vector(to_unsigned(i, 3));   
+    elsif (i = 7) then
+        pixelOut <= color;
+        i := i + 1;
+        spriteAddr <= (others => '0');
     end if;
+    
+        temp <= color;
 end process;
 
 end Behavioral;

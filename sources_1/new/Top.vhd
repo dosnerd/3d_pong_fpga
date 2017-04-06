@@ -38,17 +38,32 @@ entity Top is
     vSync : out STD_LOGIC;
     vgaRed : out STD_LOGIC_VECTOR(3 downto 0);
     vgaGreen : out STD_LOGIC_VECTOR(3 downto 0);
-    vgaBlue : out STD_LOGIC_VECTOR(3 downto 0)
+    vgaBlue : out STD_LOGIC_VECTOR(3 downto 0);
+    
+    
+    Hsync2 : out STD_LOGIC;
+    vSync2 : out STD_LOGIC;
+    vgaRed2 : out STD_LOGIC_VECTOR(3 downto 0);
+    vgaGreen2 : out STD_LOGIC_VECTOR(3 downto 0);
+    vgaBlue2 : out STD_LOGIC_VECTOR(3 downto 0);
+    
+    --debug
+    reset : in STD_LOGIC;
+    spriteColor : in STD_LOGIC_VECTOR (12 downto 0);
+    pixelOut : out STD_LOGIC_VECTOR (11 downto 0);
+    spriteAddr : out STD_LOGIC_VECTOR (2 downto 0)
+    
   );
 end Top;
 
 architecture Behavioral of Top is
 
     component PixelSelect is
-        Port ( VGAx : in STD_LOGIC_VECTOR (9 downto 0);
-           VGAy : in STD_LOGIC_VECTOR (9 downto 0);
-           spriteColor : in STD_LOGIC_VECTOR (15 downto 0);
+        Port ( --VGAx : in STD_LOGIC_VECTOR (9 downto 0);
+           --VGAy : in STD_LOGIC_VECTOR (9 downto 0);
+           spriteColor : in STD_LOGIC_VECTOR (12 downto 0);
            clk100 : in STD_LOGIC;
+           reset : in STD_LOGIC;
            pixelOut : out STD_LOGIC_VECTOR (11 downto 0);
            spriteAddr : out STD_LOGIC_VECTOR (2 downto 0));
     end component;
@@ -75,21 +90,23 @@ architecture Behavioral of Top is
                addr_right : in STD_LOGIC_VECTOR (2 downto 0);
                addr_spi : in STD_LOGIC_VECTOR (19 downto 0);
                data_spi : in STD_LOGIC_VECTOR (15 downto 0);
-               data_left : out STD_LOGIC_VECTOR (15 downto 0);
-               data_right : out STD_LOGIC_VECTOR (15 downto 0));
+               data_left : out STD_LOGIC_VECTOR (12 downto 0);
+               data_right : out STD_LOGIC_VECTOR (12 downto 0));
     end component;
 
     SIGNAL clk25 : STD_LOGIC;
     
     SIGNAL VGAaddressLeft : STD_LOGIC_VECTOR(19 downto 0);
     SIGNAL VGApixelLeft : STD_LOGIC_VECTOR (11 downto 0);
-    SIGNAl spriteColorLeft : STD_LOGIC_VECTOR (15 downto 0);
+    SIGNAl spriteColorLeft : STD_LOGIC_VECTOR (12 downto 0);
     SIGNAL spriteAddressLeft : STD_LOGIC_VECTOR (2 downto 0);
+    SIGNAL resetPixelLeft : STD_LOGIC := '1';
 
     SIGNAL VGAaddressRight : STD_LOGIC_VECTOR(19 downto 0);
     SIGNAL VGApixelRight : STD_LOGIC_VECTOR (11 downto 0);
-    SIGNAl spriteColorRight : STD_LOGIC_VECTOR (15 downto 0);
+    SIGNAl spriteColorRight : STD_LOGIC_VECTOR (12 downto 0);
     SIGNAL spriteAddressRight : STD_LOGIC_VECTOR (2 downto 0);
+    SIGNAL resetPixelRight : STD_LOGIC := '1';
 begin
 clk_div1: clk100_to_25 PORT MAP (
     clk_in1 => clk100,
@@ -109,12 +126,18 @@ ram: ram_controller PORT MAP (
 );
 
 PSleft: PixelSelect PORT MAP (
-    VGAx => VGAaddressLeft(9 downto 0),
-    VGAy => VGAaddressLeft(19 downto 10),
-    spriteColor => spriteColorLeft,
+    --VGAx => VGAaddressLeft(9 downto 0),
+    --VGAy => VGAaddressLeft(19 downto 10),
+--    spriteColor => spriteColorLeft,
     clk100 => clk100,
-    pixelOut => VGApixelLeft,
-    spriteAddr => spriteAddressLeft
+--    pixelOut => VGApixelLeft,
+--    spriteAddr => spriteAddressLeft
+
+--debug
+    spriteColor => spriteColor,
+    pixelOut => pixelOut,
+    reset => reset,
+    spriteAddr => spriteAddr
 );
 
 VGAleft: VGA_controller PORT MAP (    
@@ -130,10 +153,11 @@ VGAleft: VGA_controller PORT MAP (
 );
 
 PSright: PixelSelect PORT MAP (
-    VGAx => VGAaddressRight(9 downto 0),
-    VGAy => VGAaddressRight(19 downto 10),
+    --VGAx => VGAaddressRight(9 downto 0),
+    --VGAy => VGAaddressRight(19 downto 10),
     spriteColor => spriteColorRight,
     clk100 => clk100,
+    reset => resetPixelRight,
     pixelOut => VGApixelRight,
     spriteAddr => spriteAddressRight
 );
@@ -141,11 +165,11 @@ PSright: PixelSelect PORT MAP (
 VGAright: VGA_controller PORT MAP (    
     clk_in => clk25,
     sprite_color => VGApixelRight,
---    set_rgb(3 downto 0) => vgaRed, 
---    set_rgb(7 downto 4) => vgaGreen, 
---    set_rgb(11 downto 8) => vgaBlue, 
---    hsync => Hsync,
---    vsync => Vsync,
+    set_rgb(3 downto 0) => vgaRed2, 
+    set_rgb(7 downto 4) => vgaGreen2, 
+    set_rgb(11 downto 8) => vgaBlue2, 
+    hsync => Hsync2,
+    vsync => Vsync2,
     position_x => VGAaddressRight(9 downto 0),
     position_y => VGAaddressRight(19 downto 10)
 );
