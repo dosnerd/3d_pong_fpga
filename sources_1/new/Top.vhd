@@ -84,14 +84,15 @@ architecture Behavioral of Top is
         );
     end component;
     component ram_controller is
-        Port ( VGAleft : in STD_LOGIC_VECTOR (19 downto 0);
-               VGAright : in STD_LOGIC_VECTOR (19 downto 0);
-               addr_left : in STD_LOGIC_VECTOR (2 downto 0);
-               addr_right : in STD_LOGIC_VECTOR (2 downto 0);
-               addr_spi : in STD_LOGIC_VECTOR (19 downto 0);
-               data_spi : in STD_LOGIC_VECTOR (15 downto 0);
-               data_left : out STD_LOGIC_VECTOR (12 downto 0);
-               data_right : out STD_LOGIC_VECTOR (12 downto 0));
+        Port ( clk          : in STD_LOGIC; 
+               VGAleft      : in STD_LOGIC_VECTOR (19 downto 0);
+               VGAright     : in STD_LOGIC_VECTOR (19 downto 0);
+               addr_left    : in STD_LOGIC_VECTOR (2 downto 0);
+               addr_right   : in STD_LOGIC_VECTOR (2 downto 0);
+               addr_spi     : in STD_LOGIC_VECTOR (19 downto 0);
+               data_spi     : in STD_LOGIC_VECTOR (15 downto 0);
+               data_left    : out STD_LOGIC_VECTOR (12 downto 0);
+               data_right   : out STD_LOGIC_VECTOR (12 downto 0));
     end component;
 
     SIGNAL clk25 : STD_LOGIC;
@@ -114,6 +115,7 @@ clk_div1: clk100_to_25 PORT MAP (
 );
 
 ram: ram_controller PORT MAP (
+    clk => clk100,  --TODO: maybe set on 200 MHz
     VGAleft => VGAaddressLeft,
     VGAright => VGAaddressRight,
     addr_left => spriteAddressLeft,
@@ -126,18 +128,19 @@ ram: ram_controller PORT MAP (
 );
 
 PSleft: PixelSelect PORT MAP (
-    --VGAx => VGAaddressLeft(9 downto 0),
-    --VGAy => VGAaddressLeft(19 downto 10),
---    spriteColor => spriteColorLeft,
+--    VGAx => VGAaddressLeft(9 downto 0),
+--    VGAy => VGAaddressLeft(19 downto 10),
+    spriteColor => spriteColorLeft,
     clk100 => clk100,
---    pixelOut => VGApixelLeft,
---    spriteAddr => spriteAddressLeft
+    pixelOut => VGApixelLeft,
+    spriteAddr => spriteAddressLeft,
+    reset => resetPixelLeft
 
 --debug
-    spriteColor => spriteColor,
-    pixelOut => pixelOut,
-    reset => reset,
-    spriteAddr => spriteAddr
+--    spriteColor => spriteColor,
+--    pixelOut => pixelOut,
+--    reset => reset,
+--    spriteAddr => spriteAddr
 );
 
 VGAleft: VGA_controller PORT MAP (    
