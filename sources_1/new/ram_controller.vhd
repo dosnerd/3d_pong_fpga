@@ -57,7 +57,7 @@ architecture Behavioral of ram_controller is
     end component;
     
     --SIGNAL clk_mod : STD_LOGIC := '0';
-    SIGNAL select_mod : STD_LOGIC_vector(6 downto 0) := (others => '0');
+    SIGNAL select_mod : STD_LOGIC_vector(7 downto 0) := (others => '0');
     SIGNAL pos_mod : STD_LOGIC_vector(19 downto 0) := (others => '0');
     --SIGNAL mod_address: STD_LOGIC_vector(19 downto 0);
     SIGNAL color_mod : STD_LOGIC_vector(12 downto 0) := (others => '0');
@@ -66,6 +66,15 @@ begin
 test: ram_module PORT MAP(
     clk => clk,
     ss => select_mod(0),
+    write => '1',
+    screen_left => clk,
+    position => pos_mod,
+    pixel => color_mod
+);
+
+test2: ram_module PORT MAP(
+    clk => clk,
+    ss => select_mod(1),
     write => '1',
     screen_left => clk,
     position => pos_mod,
@@ -81,21 +90,21 @@ data_right  <=    color_mod WHEN clk = '1';
 --mod_address <=  addr_left WHEN clk = '0' ELSE
 --                addr_right;
                 
-select_mod <=   "0000000" WHEN  addr_left = "000" AND clk = '0' ELSE
-                "0000001" WHEN  addr_left = "001" AND clk = '0' ELSE
-                "0000010" WHEN  addr_left = "010" AND clk = '0' ELSE
-                "0000100" WHEN  addr_left = "011" AND clk = '0' ELSE
-                "0001000" WHEN  addr_left = "100" AND clk = '0' ELSE
-                "0010000" WHEN  addr_left = "101" AND clk = '0' ELSE
-                "0100000" WHEN  addr_left = "110" AND clk = '0' ELSE
-                "0100000" WHEN  addr_right = "000" AND clk = '1' ELSE
-                "0010000" WHEN  addr_right = "001" AND clk = '1' ELSE
-                "0001000" WHEN  addr_right = "010" AND clk = '1' ELSE
-                "0000100" WHEN  addr_right = "011" AND clk = '1' ELSE
-                "0000010" WHEN  addr_right = "100" AND clk = '1' ELSE
-                "0000001" WHEN  addr_right = "101" AND clk = '1' ELSE
-                "0000000" WHEN  addr_right = "110" AND clk = '1' ELSE                
-                "1000000";
+select_mod <=   "00000001" WHEN  addr_left = "000" AND clk = '0' ELSE
+                "00000010" WHEN  addr_left = "001" AND clk = '0' ELSE
+                "00000100" WHEN  addr_left = "010" AND clk = '0' ELSE
+                "00001000" WHEN  addr_left = "011" AND clk = '0' ELSE
+                "00010000" WHEN  addr_left = "100" AND clk = '0' ELSE
+                "00100000" WHEN  addr_left = "101" AND clk = '0' ELSE
+                "01000000" WHEN  addr_left = "110" AND clk = '0' ELSE
+                "01000000" WHEN  addr_right = "000" AND clk = '1' ELSE
+                "00100000" WHEN  addr_right = "001" AND clk = '1' ELSE
+                "00010000" WHEN  addr_right = "010" AND clk = '1' ELSE
+                "00001000" WHEN  addr_right = "011" AND clk = '1' ELSE
+                "00000100" WHEN  addr_right = "100" AND clk = '1' ELSE
+                "00000010" WHEN  addr_right = "101" AND clk = '1' ELSE
+                "00000001" WHEN  addr_right = "110" AND clk = '1' ELSE                
+                "10000000";
 
 --process(clk)
 --begin
