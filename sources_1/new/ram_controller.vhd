@@ -56,6 +56,15 @@ architecture Behavioral of ram_controller is
                pixel : out STD_LOGIC_VECTOR (12 downto 0));         --Color on the current location
     end component;
     
+     component ram_module2 is
+           Port ( clk : in STD_LOGIC;               --on rising edge, give color of current position. (USE ONLY 1 TICK, NOT MORE)
+                  ss : in STD_LOGIC;                --high active
+                  write : in STD_LOGIC;             --low active!!
+                  screen_left : in STD_LOGIC;       --low, data for left screen, high data for right screen
+                  position : in STD_LOGIC_VECTOR (19 downto 0);        --VGA position (0,0) => already visible
+                  pixel : out STD_LOGIC_VECTOR (12 downto 0));         --Color on the current location
+       end component;
+    
     --SIGNAL clk_mod : STD_LOGIC := '0';
     SIGNAL select_mod : STD_LOGIC_vector(7 downto 0) := (others => '0');
     SIGNAL pos_mod : STD_LOGIC_vector(19 downto 0) := (others => '0');
@@ -63,7 +72,7 @@ architecture Behavioral of ram_controller is
     SIGNAL color_mod : STD_LOGIC_vector(12 downto 0) := (others => '0');
 begin
 
-test: ram_module PORT MAP(
+left: ram_module PORT MAP(
     clk => clk,
     ss => select_mod(0),
     write => '1',
@@ -72,7 +81,16 @@ test: ram_module PORT MAP(
     pixel => color_mod
 );
 
-test2: ram_module PORT MAP(
+right: ram_module PORT MAP(
+    clk => clk,
+    ss => select_mod(2),
+    write => '1',
+    screen_left => clk,
+    position => pos_mod,
+    pixel => color_mod
+);
+
+background: ram_module2 PORT MAP( 
     clk => clk,
     ss => select_mod(1),
     write => '1',
@@ -91,20 +109,27 @@ data_right  <=    color_mod WHEN clk = '1';
 --                addr_right;
                 
 select_mod <=   "00000001" WHEN  addr_left = "000" AND clk = '0' ELSE
-                "00000010" WHEN  addr_left = "001" AND clk = '0' ELSE
-                "00000100" WHEN  addr_left = "010" AND clk = '0' ELSE
-                "00001000" WHEN  addr_left = "011" AND clk = '0' ELSE
-                "00010000" WHEN  addr_left = "100" AND clk = '0' ELSE
-                "00100000" WHEN  addr_left = "101" AND clk = '0' ELSE
-                "01000000" WHEN  addr_left = "110" AND clk = '0' ELSE
-                "01000000" WHEN  addr_right = "000" AND clk = '1' ELSE
-                "00100000" WHEN  addr_right = "001" AND clk = '1' ELSE
-                "00010000" WHEN  addr_right = "010" AND clk = '1' ELSE
-                "00001000" WHEN  addr_right = "011" AND clk = '1' ELSE
-                "00000100" WHEN  addr_right = "100" AND clk = '1' ELSE
-                "00000010" WHEN  addr_right = "101" AND clk = '1' ELSE
-                "00000001" WHEN  addr_right = "110" AND clk = '1' ELSE                
-                "10000000";
+                "00000100" WHEN  addr_left = "001" AND clk = '0' ELSE
+                "00000100" WHEN  addr_right = "000" AND clk = '1' ELSE
+                "00000001" WHEN  addr_right = "001" AND clk = '1' ELSE
+                "00000010";
+
+
+--                "00000001" WHEN  addr_left = "000" AND clk = '0' ELSE
+--                "00000010" WHEN  addr_left = "001" AND clk = '0' ELSE
+--                "00000100" WHEN  addr_left = "010" AND clk = '0' ELSE
+--                "00001000" WHEN  addr_left = "011" AND clk = '0' ELSE
+--                "00010000" WHEN  addr_left = "100" AND clk = '0' ELSE
+--                "00100000" WHEN  addr_left = "101" AND clk = '0' ELSE
+--                "01000000" WHEN  addr_left = "110" AND clk = '0' ELSE
+--                "01000000" WHEN  addr_right = "000" AND clk = '1' ELSE
+--                "00100000" WHEN  addr_right = "001" AND clk = '1' ELSE
+--                "00010000" WHEN  addr_right = "010" AND clk = '1' ELSE
+--                "00001000" WHEN  addr_right = "011" AND clk = '1' ELSE
+--                "00000100" WHEN  addr_right = "100" AND clk = '1' ELSE
+--                "00000010" WHEN  addr_right = "101" AND clk = '1' ELSE
+--                "00000001" WHEN  addr_right = "110" AND clk = '1' ELSE                
+--                "10000000";
 
 --process(clk)
 --begin

@@ -32,16 +32,16 @@ use IEEE.STD_LOGIC_SIGNED.ALL;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
-entity ram_module is
+entity ram_module2 is
     Port ( clk : in STD_LOGIC;               --on both edges
            ss : in STD_LOGIC;                --high active
            write : in STD_LOGIC;             --low active!!
            screen_left : in STD_LOGIC;       --low, data for left screen, high data for right screen
            position : in STD_LOGIC_VECTOR (19 downto 0);        --VGA position (0,0) => already visible
            pixel : out STD_LOGIC_VECTOR (12 downto 0));         --Color on the current location
-end ram_module;
+end ram_module2;
 
-architecture Behavioral of ram_module is
+architecture Behavioral of ram_module2 is
     SIGNAL color : STD_LOGIC_VECTOR (12 downto 0) := (others => '0');
     SIGNAL X : STD_LOGIC_VECTOR (9 downto 0);
     SIGNAL Y : STD_LOGIC_VECTOR (9 downto 0);
@@ -56,41 +56,20 @@ begin
     --DO NOT USE THE FOLOW LINE
     --if (rising_edge(clk)) then end if;
     --without the above line, the process will excecute on both edges, not only the rising/falling edge.
---    color(3 downto 0) <= "1111";
-
-
+    
     if clk_old = ss then
         clk_old <= not ss;
         
-        if (X > 0 and X < 10) then
-            color(12) <= '0';
-            if (Y > 0 and Y < 50) then
-                color(11 downto 8) <= "0000";
-                color(7 downto 4) <= "0000";
-                color(3 downto 0) <= "1111";
-            else
-                color(11 downto 8) <= "1111";
-                color(7 downto 4) <= "0000";
-                color(3 downto 0) <= "0000";
-            end if;
-        else
-            color(12) <= '1';
-            color(11 downto 8) <= "0000";
-            color(7 downto 4) <= "0000";
-            color(3 downto 0) <= "0000";
-        end if;
+        color(12) <= '0';
         
+        
+            
         if ss = '1' then
             pixel <= color;
         else
             pixel <= (others => 'Z');
         end if;
-    end if;    
-    ------------------------------------------here come your code------------------------------------------
-    --
-    --
-    -------------------------------------------------------------------------------------------------------
-    
+    end if;
 end process;
 
 end Behavioral;

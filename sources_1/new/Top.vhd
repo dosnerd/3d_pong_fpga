@@ -62,7 +62,7 @@ architecture Behavioral of Top is
         Port ( --VGAx : in STD_LOGIC_VECTOR (9 downto 0);
            --VGAy : in STD_LOGIC_VECTOR (9 downto 0);
            spriteColor : in STD_LOGIC_VECTOR (12 downto 0);
-           clk100 : in STD_LOGIC;
+           clk200 : in STD_LOGIC;
            reset : in STD_LOGIC;
            pixelOut : out STD_LOGIC_VECTOR (11 downto 0);
            spriteAddr : out STD_LOGIC_VECTOR (2 downto 0));
@@ -135,7 +135,7 @@ PSleft: PixelSelect PORT MAP (
 --    VGAx => VGAaddressLeft(9 downto 0),
 --    VGAy => VGAaddressLeft(19 downto 10),
     spriteColor => spriteColorLeft,
-    clk100 => clk100,
+    clk200 => clk200,
     pixelOut => VGApixelLeft,
     spriteAddr => spriteAddressLeft,
     reset => clk25
@@ -163,7 +163,7 @@ PSright: PixelSelect PORT MAP (
     --VGAx => VGAaddressRight(9 downto 0),
     --VGAy => VGAaddressRight(19 downto 10),
     spriteColor => spriteColorRight,
-    clk100 => clk100,
+    clk200 => clk200,
     reset => clk25,
     pixelOut => VGApixelRight,
     spriteAddr => spriteAddressRight
