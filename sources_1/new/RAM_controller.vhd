@@ -58,8 +58,6 @@ architecture Behavioral of RAM_controller is
         );
     end component;
     
-    SIGNAL left_color, right_color : STD_LOGIC_VECTOR (11 downto 0);
-    
     SIGNAL color : STD_LOGIC_VECTOR (11 downto 0);
     SIGNAL ball_left, ball_right, bat1_left, bat1_right : STD_LOGIC_VECTOR (11 downto 0);
     SIGNAL ball_emtpy_left, ball_emtpy_right, bat1_emtpy_left, bat1_emtpy_right, bat1_opacity_left, bat1_opacity_right  : STD_LOGIC;
@@ -88,12 +86,15 @@ bat1_module: bat1 PORT MAP(
 );
 
 left: process(clk25)
+    variable left_color : STD_LOGIC_VECTOR (11 downto 0);
 begin
     if (falling_edge(clk25)) then
         if (bat1_emtpy_left = '0') then
-            left_color <= bat1_left;
+            left_color := bat1_left;
+        elsif (ball_emtpy_left = '0') then
+            left_color := ball_left;
         else
-            left_color <= (others => '0');
+            left_color := (others => '0');
         end if;
         
         pixel_left <= left_color; 
@@ -101,13 +102,18 @@ begin
 end process;
 
 right: process(clk25)
+    variable right_color : STD_LOGIC_VECTOR (11 downto 0);
 begin
     if (falling_edge(clk25)) then
         if (bat1_emtpy_right = '0') then
-            right_color <= bat1_right;
+            right_color := bat1_right;
+        elsif (ball_emtpy_right = '0') then
+            right_color := ball_right;
+        else
+            right_color := (others => '0');
         end if;
         
-        pixel_right <= bat1_right; 
+        pixel_right <= right_color;
     end if;
 end process;
 
