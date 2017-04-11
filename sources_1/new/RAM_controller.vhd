@@ -105,10 +105,10 @@ right: process(clk25)
     variable right_color : STD_LOGIC_VECTOR (11 downto 0);
 begin
     if (falling_edge(clk25)) then
-        if (bat1_emtpy_right = '0') then
-            right_color := bat1_right;
-        elsif (ball_emtpy_right = '0') then
+        if (ball_emtpy_right = '0') then
             right_color := ball_right;
+        elsif (bat1_emtpy_right = '0') then
+            right_color := bat1_right;
         else
             right_color := (others => '0');
         end if;

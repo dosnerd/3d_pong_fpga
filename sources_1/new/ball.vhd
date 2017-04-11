@@ -58,9 +58,9 @@ begin
         if (prescaler >= 3000000) then
             prescaler := 0;
             
-            if (z_index > -2) then
+            if (z_index >= -1) then
                 dir := false;
-            elsif (z_index < -20) then
+            elsif (z_index <= -20) then
                 dir := true;
             end if;
         
@@ -72,7 +72,6 @@ begin
         end if;
     end if;
 end process;
-
 
 main: process(clk25)
     variable a2_left, b2_left, c2_left : integer;
@@ -90,8 +89,8 @@ begin
         xMem_left := X_center * z_index;
         yMem_left := Y_center * z_index;
         
-        xMem_right := X_center * (-22 - z_index);
-        yMem_right := Y_center * (-22 - z_index);
+        xMem_right := X_center * (21 + z_index);
+        yMem_right := Y_center * (-21 - z_index);
         
 --        a2 := to_integer(signed(X_bal)) - xMem;
 --        b2 := to_integer(signed(Y_bal)) - yMem;
