@@ -45,17 +45,46 @@ architecture Behavioral of RAM_controller is
             clk25 : in STD_LOGIC;
             X, Y : in STD_LOGIC_VECTOR (9 downto 0);
             out_left, out_right : out STD_LOGIC_VECTOR (11 downto 0);
-            empty, opacity : out STD_LOGIC
+            empty_left, empty_right : out STD_LOGIC
         );
     end component;
     
+    SIGNAL left_color, right_color : STD_LOGIC_VECTOR (11 downto 0);
+    
     SIGNAL color : STD_LOGIC_VECTOR (11 downto 0);
+    SIGNAL ball_left, ball_right : STD_LOGIC_VECTOR (11 downto 0);
+    SIGNAL ball_emtpy_left, ball_emtpy_right : STD_LOGIC;
 begin
 
-process(clk25)
+ball_module: ball PORT MAP(
+    clk25 => clk25,
+    X => X,
+    Y => Y,
+    out_left => ball_left,
+    out_right => ball_right,
+    empty_left => ball_emtpy_left,
+    empty_right => ball_emtpy_right
+);
+
+left: process(clk25)
 begin
     if (falling_edge(clk25)) then
+        if (ball_emtpy_left = '0') then
+            left_color <= ball_left;
+        end if;
         
+        pixel_left <= ball_left; 
+    end if;
+end process;
+
+right: process(clk25)
+begin
+    if (falling_edge(clk25)) then
+        if (ball_emtpy_right = '0') then
+            right_color <= ball_right;
+        end if;
+        
+        pixel_right <= ball_right; 
     end if;
 end process;
 

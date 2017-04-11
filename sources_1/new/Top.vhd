@@ -95,6 +95,28 @@ clk_div1: clk100_to_25 PORT MAP (
     clk_out2 => clk200
 );
 
+VGAleft: VGA_controller PORT MAP (    
+    clk_in => clk25,
+    sprite_color => pixel_left,
+    set_rgb(3 downto 0) => vgaRed, 
+    set_rgb(7 downto 4) => vgaGreen, 
+    set_rgb(11 downto 8) => vgaBlue, 
+    hsync => Hsync,
+    vsync => vSync,
+    position_x => X,
+    position_y => Y
+);
+
+VGAright: VGA_controller PORT MAP (    
+    clk_in => clk25,
+    sprite_color => pixel_right,
+    set_rgb(3 downto 0) => vgaRed2, 
+    set_rgb(7 downto 4) => vgaGreen2, 
+    set_rgb(11 downto 8) => vgaBlue2, 
+    hsync => Hsync2,
+    vsync => vSync2
+);
+
 ram: RAM_controller PORT MAP(
     clk25 => clk25,
     clk200 => clk200,
