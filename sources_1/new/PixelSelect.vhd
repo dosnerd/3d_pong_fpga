@@ -44,7 +44,7 @@ entity PixelSelect is
 end PixelSelect;
 
 architecture Behavioral of PixelSelect is
-    --SIGNAL debug1 : STD_LOGIC_VECTOR (11 downto 0) := (others => '0');
+    SIGNAL debug1 : STD_LOGIC_VECTOR (11 downto 0) := (others => '0');
     --SIGNAL debug2 : STD_LOGIC_VECTOR (11 downto 0) := (others => '0');
     --SIGNAL reset_c : STD_LOGIC := '0';
     --SIGNAL clk : STD_LOGIC := '1';
@@ -53,32 +53,68 @@ begin
 process (clk200)
     variable i : integer range -1 to 8 := 0;
     variable color : STD_LOGIC_VECTOR (11 downto 0) := (others => '0');
+    variable sprite_div : STD_LOGIC_VECTOR (11 downto 0) := (others => '0');
+    variable color_div : STD_LOGIC_VECTOR (11 downto 0) := (others => '0');
 begin
-    if rising_edge(clk200) then    
-        if (i < 7 and i >= 0) then
-            --when no sprite drawed, no division;
-            if (color = 0 and spriteColor(12) = '0')then
-                color := spriteColor(11 downto 0);
-            elsif (spriteColor(11 downto 0) > 0) then
-                --devide every color by 2
-                color(11 downto 8) := '0' & color(11 downto 9);
-                color(7 downto 4) := '0' & color(7 downto 5);
-                color(3 downto 0) := '0' & color(3 downto 1);
-                
-                color(11 downto 8) := color(11 downto 8) + ('0' & spriteColor(11 downto 9));
-                color(7 downto 4) := color(7 downto 4) + ('0' & spriteColor(7 downto 5));
-                color(3 downto 0) := color(3 downto 0) + ('0' & spriteColor(3 downto 1));
-                
-                --color := color + ('0' & spriteColor(11 downto 1));
-                --color := ('0' & spriteColor(11 downto 1));
-            end if;
     
-    --                color := (others => '1');
-            
-            --when solid sprite, exit
-            if spriteColor(12) = '0' then
+    sprite_div(11 downto 8) := '0' & spriteColor(11 downto 9);
+    sprite_div(7 downto 4) := '0' & spriteColor(7 downto 5);
+    sprite_div(3 downto 0) := '0' & spriteColor(3 downto 1);
+    
+    color_div(11 downto 8) := '0' & color(11 downto 9);
+    color_div(7 downto 4) := '0' & color(7 downto 5);
+    color_div(3 downto 0) := '0' & color(3 downto 1);
+
+    if falling_edge(clk200) then        
+        if (i < 7 and i >= 0) then             
+        
+            if (spriteColor(12) = '0') then
                 i := 6;
             end if;
+        
+            if spriteColor(11 downto 0) > 0 then
+                if (spriteColor(12) = '1') then
+                    color(11 downto 8) := color_div(11 downto 8) + sprite_div(11 downto 8);
+                    color(7 downto 4) := color_div(7 downto 4) + sprite_div(7 downto 4);
+                    color(3 downto 0) := color_div(3 downto 0) + sprite_div(3 downto 0);
+                else
+                    --color := color(11 downto 0) + spriteColor(11 downto 0);
+                    color(11 downto 8) := color(11 downto 8) + spriteColor(11 downto 8);
+                    color(7 downto 4) := color(7 downto 4) + spriteColor(7 downto 4);
+                    color(3 downto 0) := color(3 downto 0) + spriteColor(3 downto 0);
+                end if;
+                   
+                
+    --               color(11 downto 8) := '0' & (color(11 downto 9) + spriteColor(11 downto 9));
+    --               color(11 downto 8) := '0' & (color(7 downto 5) + spriteColor(7 downto 5));
+    --               color(11 downto 8) := '0' & (color(3 downto 1) + spriteColor(3 downto 1));
+                   
+                   
+                   
+                   
+    --              color(11 downto 8) := '0' & (color(11 downto 9) + spriteColor(11 downto 9));
+    --              color(11 downto 8) := '0' & (color(7 downto 5) + spriteColor(7 downto 5));
+    --              color(11 downto 8) := '0' & (color(3 downto 1) + spriteColor(3 downto 1));
+                
+                
+                
+                
+                    --devide every color by 2
+    --                color(11 downto 8) := '0' & color(11 downto 9);
+    --                color(7 downto 4) := '0' & color(7 downto 5);
+    --                color(3 downto 0) := '0' & color(3 downto 1);
+                    
+    --                color(11 downto 8) := color(11 downto 8) + ('0' & spriteColor(11 downto 9));
+    --                color(7 downto 4) := color(7 downto 4) + ('0' & spriteColor(7 downto 5));
+    --                color(3 downto 0) := color(3 downto 0) + ('0' & spriteColor(3 downto 1));
+                    
+                    --color := color + ('0' & spriteColor(11 downto 1));
+                    --color := ('0' & spriteColor(11 downto 1));
+                --end if;
+            end if;
+    --                color := (others => '1');
+    
+            debug1 <= color; 
             i := i + 1;
             spriteAddr <= std_logic_vector(to_unsigned(i, 3));
         end if;

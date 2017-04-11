@@ -82,14 +82,14 @@ left: ram_module PORT MAP(
     pixel => color_mod
 );
 
-right: ram_module PORT MAP(
-    clk => clk25,
-    ss => select_mod(2),
-    write => '1',
-    screen_left => clk200,
-    position => pos_mod,
-    pixel => color_mod
-);
+--right: ram_module PORT MAP(
+--    clk => clk25,
+--    ss => select_mod(2),
+--    write => '1',
+--    screen_left => clk200,
+--    position => pos_mod,
+--    pixel => color_mod
+--);
 
 background: ram_module2 PORT MAP( 
     clk => clk25,
@@ -110,8 +110,8 @@ data_right  <=    color_mod WHEN clk200 = '1';
 --                addr_right;
                 
 select_mod <=   "00000001" WHEN  addr_left = "000" AND clk200 = '0' ELSE
-                "00000100" WHEN  addr_left = "001" AND clk200 = '0' ELSE
-                "00000100" WHEN  addr_right = "000" AND clk200 = '1' ELSE
+                --"00000100" WHEN  addr_left = "001" AND clk200 = '0' ELSE
+                --"00000100" WHEN  addr_right = "000" AND clk200 = '1' ELSE
                 "00000001" WHEN  addr_right = "001" AND clk200 = '1' ELSE
                 "00000010";
 

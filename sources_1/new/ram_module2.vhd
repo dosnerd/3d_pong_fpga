@@ -71,14 +71,14 @@ begin
     --    color(3 downto 0) <= "1111";
         
         if (X > 20 and X < 50) then
-            if (Y > 0 and Y < 80) then
+            if (Y > 50 and Y < 180) then
                 color(11 downto 8) <= "1111";
                 color(7 downto 4) <= "1111";
                 color(3 downto 0) <= "1111";
             else
                 color(11 downto 8) <= "1111";
-                color(7 downto 4) <= "0000";
-                color(3 downto 0) <= "1111";
+                color(7 downto 4) <= "1111";
+                color(3 downto 0) <= "0000";
             end if;
         else
             color(11 downto 8) <= "0000";
