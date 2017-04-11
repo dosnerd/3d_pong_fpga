@@ -51,16 +51,32 @@ begin
 X <= position(9 downto 0);
 Y <= position(19 downto 10);
 
-process (ss)
+pixel <=    color WHEN ss = '1' ELSE
+            (others => 'Z');
+
+--enable: process (ss)
+--begin
+--    --DO NOT USE THE FOLOW LINE
+--    --if (rising_edge(clk)) then end if;
+--    --without the above line, the process will excecute on both edges, not only the rising/falling edge.
+----    color(3 downto 0) <= "1111";
+--    if (rising_edge(ss)) then
+--        pixel <= color;
+--    end if;
+    
+--    if (falling_edge(ss)) then
+--        pixel <= (others => 'Z');
+--    end if;
+    
+--end process;
+
+main: process(clk)
 begin
-    --DO NOT USE THE FOLOW LINE
-    --if (rising_edge(clk)) then end if;
-    --without the above line, the process will excecute on both edges, not only the rising/falling edge.
---    color(3 downto 0) <= "1111";
+    
+    if (rising_edge(clk)) then
 
-
-    if clk_old = ss then
-        clk_old <= not ss;
+--    if clk_old = ss then
+--        clk_old <= not ss;
         
         if (X > 0 and X < 10) then
             color(12) <= '0';
@@ -80,11 +96,11 @@ begin
             color(3 downto 0) <= "0000";
         end if;
         
-        if ss = '1' then
-            pixel <= color;
-        else
-            pixel <= (others => 'Z');
-        end if;
+--        if ss = '1' then
+--            pixel <= color;
+--        else
+--            pixel <= (others => 'Z');
+--        end if;
     end if;    
     ------------------------------------------here come your code------------------------------------------
     --

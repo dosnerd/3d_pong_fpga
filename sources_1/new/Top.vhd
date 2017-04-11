@@ -85,7 +85,8 @@ architecture Behavioral of Top is
         );
     end component;
     component ram_controller is
-        Port ( clk          : in STD_LOGIC; 
+        Port ( clk200       : in STD_LOGIC;
+               clk25        : in STD_LOGIC;
                VGAleft      : in STD_LOGIC_VECTOR (19 downto 0);
                VGAright     : in STD_LOGIC_VECTOR (19 downto 0);
                addr_left    : in STD_LOGIC_VECTOR (2 downto 0);
@@ -119,7 +120,8 @@ clk_div1: clk100_to_25 PORT MAP (
 );
 
 ram: ram_controller PORT MAP (
-    clk => clk200,
+    clk200 => clk200,
+    clk25 => clk25,
     VGAleft => VGAaddressLeft,
     VGAright => VGAaddressRight,
     addr_left => spriteAddressLeft,

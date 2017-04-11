@@ -34,7 +34,8 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity ram_controller is
     Port (
-           clk          : in STD_LOGIC;
+           clk200       : in STD_LOGIC;
+           clk25        : in STD_LOGIC;
            VGAleft      : in STD_LOGIC_VECTOR (19 downto 0);
            VGAright     : in STD_LOGIC_VECTOR (19 downto 0);
            addr_left    : in STD_LOGIC_VECTOR (2 downto 0);
@@ -73,45 +74,45 @@ architecture Behavioral of ram_controller is
 begin
 
 left: ram_module PORT MAP(
-    clk => clk,
+    clk => clk25,
     ss => select_mod(0),
     write => '1',
-    screen_left => clk,
+    screen_left => clk200,
     position => pos_mod,
     pixel => color_mod
 );
 
 right: ram_module PORT MAP(
-    clk => clk,
+    clk => clk25,
     ss => select_mod(2),
     write => '1',
-    screen_left => clk,
+    screen_left => clk200,
     position => pos_mod,
     pixel => color_mod
 );
 
 background: ram_module2 PORT MAP( 
-    clk => clk,
+    clk => clk25,
     ss => select_mod(1),
     write => '1',
-    screen_left => clk,
+    screen_left => clk200,
     position => pos_mod,
     pixel => color_mod
 );
 
-pos_mod <= VGAleft WHEN clk = '0' ELSE
+pos_mod <= VGAleft WHEN clk200 = '0' ELSE
            VGAright;
            
-data_left   <=    color_mod WHEN clk = '0';
-data_right  <=    color_mod WHEN clk = '1';
+data_left   <=    color_mod WHEN clk200 = '0';
+data_right  <=    color_mod WHEN clk200 = '1';
            
 --mod_address <=  addr_left WHEN clk = '0' ELSE
 --                addr_right;
                 
-select_mod <=   "00000001" WHEN  addr_left = "000" AND clk = '0' ELSE
-                "00000100" WHEN  addr_left = "001" AND clk = '0' ELSE
-                "00000100" WHEN  addr_right = "000" AND clk = '1' ELSE
-                "00000001" WHEN  addr_right = "001" AND clk = '1' ELSE
+select_mod <=   "00000001" WHEN  addr_left = "000" AND clk200 = '0' ELSE
+                "00000100" WHEN  addr_left = "001" AND clk200 = '0' ELSE
+                "00000100" WHEN  addr_right = "000" AND clk200 = '1' ELSE
+                "00000001" WHEN  addr_right = "001" AND clk200 = '1' ELSE
                 "00000010";
 
 

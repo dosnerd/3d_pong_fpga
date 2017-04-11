@@ -370,3 +370,11 @@ set_property PACKAGE_PIN B15 [get_ports {vgaRed2[1]}]
 set_property PACKAGE_PIN P18 [get_ports {vgaBlue2[1]}]
 set_property PACKAGE_PIN A16 [get_ports {vgaRed2[0]}]
 set_property PACKAGE_PIN C16 [get_ports {vgaGreen2[1]}]
+
+
+#set_clock_groups -physically_exclusive -group [get_clocks -include_generated_clocks clk100] -group [get_clocks -include_generated_clocks sys_clk_pin]
+#set_clock_groups -physically_exclusive -group [get_clocks -include_generated_clocks clkfbout_clk100_to_25] -group [get_clocks -include_generated_clocks clkfbout_clk100_to_25_1]
+#set_clock_groups -physically_exclusive -group [get_clocks -include_generated_clocks clk_out1_clk100_to_25] -group [get_clocks -include_generated_clocks clk_out1_clk100_to_25_1]
+#set_clock_groups -physically_exclusive -group [get_clocks -include_generated_clocks clk_out2_clk100_to_25] -group [get_clocks -include_generated_clocks clk_out2_clk100_to_25_1]
+
+set_switching_activity -deassert_resets 

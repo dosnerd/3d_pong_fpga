@@ -51,25 +51,48 @@ begin
 X <= position(9 downto 0);
 Y <= position(19 downto 10);
 
-process (ss)
+pixel <=    color WHEN ss = '1' ELSE
+            (others => 'Z');
+
+--enable: process (ss)
+--begin
+--    if (rising_edge(ss)) then
+--        pixel <= color;
+--    end if;
+--    if (falling_edge(ss)) then
+--        pixel <= (others => 'Z');
+--    end if;
+--end process;
+
+main: process(clk)
 begin
-    --DO NOT USE THE FOLOW LINE
-    --if (rising_edge(clk)) then end if;
-    --without the above line, the process will excecute on both edges, not only the rising/falling edge.
-    
-    if clk_old = ss then
-        clk_old <= not ss;
-        
+    if (rising_edge(clk)) then        
         color(12) <= '0';
+    --    color(3 downto 0) <= "1111";
         
-        
-            
-        if ss = '1' then
-            pixel <= color;
+        if (X > 20 and X < 50) then
+            if (Y > 0 and Y < 80) then
+                color(11 downto 8) <= "1111";
+                color(7 downto 4) <= "1111";
+                color(3 downto 0) <= "1111";
+            else
+                color(11 downto 8) <= "1111";
+                color(7 downto 4) <= "0000";
+                color(3 downto 0) <= "1111";
+            end if;
         else
-            pixel <= (others => 'Z');
-        end if;
+            color(11 downto 8) <= "0000";
+            color(7 downto 4) <= "0000";
+            color(3 downto 0) <= "0000";
+        end if;    
     end if;
+    
+    
+    ------------------------------------------here come your code------------------------------------------
+    --
+    --
+    -------------------------------------------------------------------------------------------------------
+    
 end process;
 
 end Behavioral;
