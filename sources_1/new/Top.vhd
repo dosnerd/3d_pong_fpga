@@ -78,14 +78,14 @@ architecture Behavioral of Top is
     component RAM_controller is
       Port (
             clk25, clk200 : in STD_LOGIC;
-            X_left, Y_left, X_right, Y_right : in STD_LOGIC_VECTOR (9 downto 0);
+            X, Y : in STD_LOGIC_VECTOR (9 downto 0);
             pixel_left, pixel_right : out STD_LOGIC_VECTOR (11 downto 0)
       );
     end component;
 
     SIGNAL clk25 : STD_LOGIC;
     SIGNAL clk200 : STD_LOGIC;
-    SIGNAL X_left, Y_left, X_right, Y_right : STD_LOGIC_VECTOR (9 downto 0);
+    SIGNAL X, Y : STD_LOGIC_VECTOR (9 downto 0);
     SIGNAL pixel_left, pixel_right : STD_LOGIC_VECTOR (11 downto 0);
 begin
 
@@ -98,10 +98,8 @@ clk_div1: clk100_to_25 PORT MAP (
 ram: RAM_controller PORT MAP(
     clk25 => clk25,
     clk200 => clk200,
-    X_left => X_left,
-    X_right => X_right,
-    Y_left => Y_left,
-    Y_right => Y_right,
+    X => X,
+    Y => Y,
     pixel_left => pixel_left,
     pixel_right => pixel_right
 );

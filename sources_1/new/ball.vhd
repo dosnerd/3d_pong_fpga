@@ -34,7 +34,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 entity ball is
     Port ( 
         clk25 : in STD_LOGIC;
-        X_left, Y_left, X_right, Y_right : in STD_LOGIC_VECTOR (9 downto 0);
+        X, Y : in STD_LOGIC_VECTOR (9 downto 0);
         out_left, out_right : out STD_LOGIC_VECTOR (11 downto 0);
         empty, opacity : out STD_LOGIC
     );
