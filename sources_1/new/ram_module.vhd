@@ -22,10 +22,10 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx leaf cells in this code.
@@ -46,6 +46,10 @@ architecture Behavioral of ram_module is
     SIGNAL X : STD_LOGIC_VECTOR (9 downto 0);
     SIGNAL Y : STD_LOGIC_VECTOR (9 downto 0);
     SIGNAL clk_old : STD_LOGIC := '1';
+--    SIGNAL X_bal, Y_bal : INTEGER := 300;
+--    SIGNAL size_bal : INTEGER := 100;
+    SIGNAL X_bal, Y_bal : STD_LOGIC_VECTOR(9 downto 0) := std_logic_vector(to_signed(300, 10)); --"0100101100";
+    SIGNAL size_bal : STD_LOGIC_VECTOR(9 downto 0) := std_logic_vector(to_signed(255, 10)); -- "0001100011";
 begin
 
 X <= position(9 downto 0);
@@ -71,30 +75,54 @@ pixel <=    color WHEN ss = '1' ELSE
 --end process;
 
 main: process(clk)
+--  variable a, b, a_2, b_2, c_2 : INTEGER;
+    variable a, b : STD_LOGIC_VECTOR(9 downto 0);
+    variable a_2, b_2, c_2 : STD_LOGIC_VECTOR(19 downto 0);
 begin
-    
+  
     if (rising_edge(clk)) then
 
 --    if clk_old = ss then
 --        clk_old <= not ss;
         
-        if (X > 0 and X < 10) then
-            color(12) <= '0';
-            if (Y > 0 and Y < 50) then
+--      b := X_bal - to_integer(signed(X));
+--      a := Y_bal - to_integer(signed(Y));
+        b := X_bal - X;
+        a := Y_bal - Y;
+        a_2 := a*a;
+        b_2 := b*b;
+        c_2 := a_2 + b_2;
+        
+        if(c_2 <= size_bal) then
+                color(12) <= '0';
                 color(11 downto 8) <= "0000";
                 color(7 downto 4) <= "0000";
                 color(3 downto 0) <= "1111";
-            else
-                color(11 downto 8) <= "1111";
-                color(7 downto 4) <= "0000";
-                color(3 downto 0) <= "0000";
-            end if;
         else
-            color(12) <= '1';
-            color(11 downto 8) <= "0000";
-            color(7 downto 4) <= "0000";
-            color(3 downto 0) <= "0000";
+                color(12) <= '1';
+                color(11 downto 8) <= "0000";
+                color(7 downto 4) <= "0000";
+                color(3 downto 0) <= "0000";    
         end if;
+                
+        
+--        if (X > 0 and X < 10) then
+--            color(12) <= '0';
+--            if (Y > 0 and Y < 50) then
+--                color(11 downto 8) <= "0000";
+--                color(7 downto 4) <= "0000";
+--                color(3 downto 0) <= "1111";
+--            else
+--                color(11 downto 8) <= "1111";
+--                color(7 downto 4) <= "0000";
+--                color(3 downto 0) <= "0000";
+--            end if;
+--        else
+--            color(12) <= '1';
+--            color(11 downto 8) <= "0000";
+--            color(7 downto 4) <= "0000";
+--            color(3 downto 0) <= "0000";
+--        end if;
         
 --        if ss = '1' then
 --            pixel <= color;
