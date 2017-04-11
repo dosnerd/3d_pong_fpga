@@ -49,11 +49,20 @@ architecture Behavioral of RAM_controller is
         );
     end component;
     
+    component bat1 is
+        Port ( 
+            clk25 : in STD_LOGIC;
+            X, Y : in STD_LOGIC_VECTOR (9 downto 0);
+            out_left, out_right : out STD_LOGIC_VECTOR (11 downto 0);
+            empty_left, empty_right, opacity_left, opacity_right : out STD_LOGIC
+        );
+    end component;
+    
     SIGNAL left_color, right_color : STD_LOGIC_VECTOR (11 downto 0);
     
     SIGNAL color : STD_LOGIC_VECTOR (11 downto 0);
-    SIGNAL ball_left, ball_right : STD_LOGIC_VECTOR (11 downto 0);
-    SIGNAL ball_emtpy_left, ball_emtpy_right : STD_LOGIC;
+    SIGNAL ball_left, ball_right, bat1_left, bat1_right : STD_LOGIC_VECTOR (11 downto 0);
+    SIGNAL ball_emtpy_left, ball_emtpy_right, bat1_emtpy_left, bat1_emtpy_right, bat1_opacity_left, bat1_opacity_right  : STD_LOGIC;
 begin
 
 ball_module: ball PORT MAP(
@@ -66,25 +75,39 @@ ball_module: ball PORT MAP(
     empty_right => ball_emtpy_right
 );
 
+bat1_module: bat1 PORT MAP(
+    clk25 => clk25,
+    X => X,
+    Y => Y,
+    out_left => bat1_left,
+    out_right => bat1_right,
+    empty_left => bat1_emtpy_left,
+    empty_right => bat1_emtpy_right,
+    opacity_left => bat1_opacity_right, 
+    opacity_right => bat1_opacity_right
+);
+
 left: process(clk25)
 begin
     if (falling_edge(clk25)) then
-        if (ball_emtpy_left = '0') then
-            left_color <= ball_left;
+        if (bat1_emtpy_left = '0') then
+            left_color <= bat1_left;
+        else
+            left_color <= (others => '0');
         end if;
         
-        pixel_left <= ball_left; 
+        pixel_left <= left_color; 
     end if;
 end process;
 
 right: process(clk25)
 begin
     if (falling_edge(clk25)) then
-        if (ball_emtpy_right = '0') then
-            right_color <= ball_right;
+        if (bat1_emtpy_right = '0') then
+            right_color <= bat1_right;
         end if;
         
-        pixel_right <= ball_right; 
+        pixel_right <= bat1_right; 
     end if;
 end process;
 
