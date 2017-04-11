@@ -49,8 +49,6 @@ architecture Behavioral of RAM_controller is
         );
     end component;
     
-    SIGNAL left_color, right_color : STD_LOGIC_VECTOR (11 downto 0);
-    
     SIGNAL color : STD_LOGIC_VECTOR (11 downto 0);
     SIGNAL ball_left, ball_right : STD_LOGIC_VECTOR (11 downto 0);
     SIGNAL ball_emtpy_left, ball_emtpy_right : STD_LOGIC;
@@ -67,24 +65,29 @@ ball_module: ball PORT MAP(
 );
 
 left: process(clk25)
+    variable left_color : STD_LOGIC_VECTOR (11 downto 0);
 begin
     if (falling_edge(clk25)) then
+        left_color := (others => '0');
         if (ball_emtpy_left = '0') then
-            left_color <= ball_left;
+            left_color := ball_left;
         end if;
         
-        pixel_left <= ball_left; 
+        pixel_left <= left_color; 
     end if;
 end process;
 
 right: process(clk25)
+    variable right_color : STD_LOGIC_VECTOR (11 downto 0);
 begin
     if (falling_edge(clk25)) then
+        right_color := (others => '0');
+    
         if (ball_emtpy_right = '0') then
-            right_color <= ball_right;
+            right_color := ball_right;
         end if;
         
-        pixel_right <= ball_right; 
+        pixel_right <= right_color; 
     end if;
 end process;
 
