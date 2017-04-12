@@ -70,6 +70,8 @@ begin
         x_center := to_integer(signed(X - 320));
         y_center := to_integer(signed(Y- 240));
         
+        --320*8=2560, 
+        --230*8=1840 240*8=1920
         zx := 2560 /  abs(x_center);
         zy := 1840 /  abs(y_center);        
         

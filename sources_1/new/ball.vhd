@@ -37,41 +37,17 @@ entity ball is
     Port ( 
         clk25 : in STD_LOGIC;
         X, Y : in STD_LOGIC_VECTOR (9 downto 0);
+        x_index, y_index, z_index : INTEGER;
         out_left, out_right : out STD_LOGIC_VECTOR (11 downto 0);
         empty_left, empty_right : out STD_LOGIC
     );
 end ball;
 
 architecture Behavioral of ball is
-    SIGNAL X_bal, Y_bal : integer := 100; --"0100101100";
-    SIGNAL size_bal : integer := 800; -- "0001100011";
-    SIGNAL z_index : integer := 5;
+    --SIGNAL x_index, y_index : integer := 100; --"0100101100";
+    CONSTANT size_bal : integer := 800; -- "0001100011";
+    --SIGNAL z_index : integer := 5;
 begin
-
-mover: process(clk25)
-    variable prescaler : integer := -1000;
-    variable dir : boolean := true;
-begin
-    if (rising_edge(clk25)) then
-        prescaler := prescaler + 1;
-                
-        if (prescaler >= 3000000) then
-            prescaler := 0;
-            
-            if (z_index >= -1) then
-                dir := false;
-            elsif (z_index <= -20) then
-                dir := true;
-            end if;
-        
-            if (dir = true) then
-                z_index <= z_index + 1;
-            else
-                z_index <= z_index - 1;
-            end if;
-        end if;
-    end if;
-end process;
 
 main: process(clk25)
     variable a2_left, b2_left, c2_left : integer;
@@ -95,14 +71,14 @@ begin
 --        a2 := to_integer(signed(X_bal)) - xMem;
 --        b2 := to_integer(signed(Y_bal)) - yMem;
 
-        a2_right := xMem_right - X_bal;
-        b2_right := yMem_right - Y_bal;
+        a2_right := xMem_right - x_index;
+        b2_right := yMem_right - y_index;
         a2_right := a2_right**2;
         b2_right := b2_right**2;
         c2_right := a2_right + b2_right;
         
-        a2_left := xMem_left - X_bal;
-        b2_left := yMem_left - Y_bal;
+        a2_left := xMem_left - x_index;
+        b2_left := yMem_left - y_index;
         a2_left := a2_left**2;
         b2_left := b2_left**2;
         c2_left := a2_left + b2_left;
