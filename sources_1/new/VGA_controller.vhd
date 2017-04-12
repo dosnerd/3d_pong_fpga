@@ -35,42 +35,39 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity VGA_controller is
     Port ( 
-    
-           clk_in : in STD_LOGIC;
-           sprite_color : in STD_LOGIC_VECTOR (11 downto 0);
-           set_rgb : out STD_LOGIC_VECTOR (11 downto 0);
-           vsync : out STD_LOGIC;
-           hsync : out STD_LOGIC;
-           position_y : out STD_LOGIC_VECTOR (9 downto 0);
-           position_x : out STD_LOGIC_VECTOR (9 downto 0));
+           clk_in           : in STD_LOGIC;
+           sprite_color     : in STD_LOGIC_VECTOR (11 downto 0);
+           set_rgb          : out STD_LOGIC_VECTOR (11 downto 0);
+           vsync            : out STD_LOGIC;
+           hsync            : out STD_LOGIC;
+           position_y       : out STD_LOGIC_VECTOR (9 downto 0);
+           position_x       : out STD_LOGIC_VECTOR (9 downto 0));
 end VGA_controller;
 
 architecture Behavioral of VGA_controller is
-      signal hcount: STD_LOGIC_VECTOR(9 downto 0);
-      signal vcount: STD_LOGIC_VECTOR(9 downto 0);
+      signal hcount: STD_LOGIC_VECTOR(9 downto 0) := (others => '0');
+      signal vcount: STD_LOGIC_VECTOR(9 downto 0) := (others => '0');
 
 begin
 
 process (clk_in)
-    
 begin
     if rising_edge(clk_in) then
+       --calculate x,y of visible screen
+       position_y <= vcount - 31;
+       position_x <= hcount - 143;
+    
 	   if (hcount >= 144) and (hcount < 784) and (vcount >= 31) and (vcount < 511) then
 	   
-        set_rgb(0) <= sprite_color(0);
-        set_rgb(1) <= sprite_color(1);
-        set_rgb(2) <= sprite_color(2);
-      else
-
-      
-        set_rgb(0) <= '0';
-        set_rgb(1) <= '0';
-        set_rgb(2) <= '0';
+	      --set_rgb <= (others => '1');
+        set_rgb(3 downto 0) <= sprite_color(3 downto 0);
+        set_rgb(7 downto 4) <= sprite_color(7 downto 4);
+        set_rgb(11 downto 8) <= sprite_color(11 downto 8);
+        
+      else      
+        set_rgb <= (others => '0');
       end if;
       
-      --calculate x,y of visible screen
-      position_y <= vcount - 31;
-      position_x <= hcount - 143;
       
       
 	 -- While on screen area,
