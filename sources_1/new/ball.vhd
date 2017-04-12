@@ -37,16 +37,14 @@ entity ball is
     Port ( 
         clk25 : in STD_LOGIC;
         X, Y : in STD_LOGIC_VECTOR (9 downto 0);
-        x_index, y_index, z_index : INTEGER;
+        x_index, y_index, z_index : in INTEGER;
         out_left, out_right : out STD_LOGIC_VECTOR (11 downto 0);
         empty_left, empty_right : out STD_LOGIC
     );
 end ball;
 
 architecture Behavioral of ball is
-    --SIGNAL x_index, y_index : integer := 100; --"0100101100";
-    CONSTANT size_bal : integer := 800; -- "0001100011";
-    --SIGNAL z_index : integer := 5;
+    CONSTANT size_bal : integer := 800;
 begin
 
 main: process(clk25)
@@ -65,12 +63,9 @@ begin
         xMem_left := X_center * z_index;
         yMem_left := Y_center * z_index;
         
-        xMem_right := X_center * (21 + z_index);
-        yMem_right := Y_center * (-21 - z_index);
+        xMem_right := X_center * (10 + z_index);
+        yMem_right := Y_center * (-10 - z_index);
         
---        a2 := to_integer(signed(X_bal)) - xMem;
---        b2 := to_integer(signed(Y_bal)) - yMem;
-
         a2_right := xMem_right - x_index;
         b2_right := yMem_right - y_index;
         a2_right := a2_right**2;
