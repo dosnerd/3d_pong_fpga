@@ -1,10 +1,10 @@
 -- Copyright 1986-2016 Xilinx, Inc. All Rights Reserved.
 -- --------------------------------------------------------------------------------
 -- Tool Version: Vivado v.2016.3 (win64) Build 1682563 Mon Oct 10 19:07:27 MDT 2016
--- Date        : Thu Apr 06 14:53:55 2017
+-- Date        : Wed Apr 12 21:21:40 2017
 -- Host        : acer running 64-bit Service Pack 1  (build 7601)
--- Command     : write_vhdl -force -mode funcsim -rename_top clk100_to_25 -prefix
---               clk100_to_25_ clk100_to_25_sim_netlist.vhdl
+-- Command     : write_vhdl -force -mode funcsim
+--               D:/School/3d_pong/prog_hardw/3d_pong/3d_pong.srcs/sources_1/ip/clk100_to_25/clk100_to_25_sim_netlist.vhdl
 -- Design      : clk100_to_25
 -- Purpose     : This VHDL netlist is a functional simulation representation of the design and should not be modified or
 --               synthesized. This netlist cannot be used for SDF annotated simulation.
@@ -20,6 +20,8 @@ entity clk100_to_25_clk100_to_25_clk_wiz is
     clk_out2 : out STD_LOGIC;
     clk_in1 : in STD_LOGIC
   );
+  attribute ORIG_REF_NAME : string;
+  attribute ORIG_REF_NAME of clk100_to_25_clk100_to_25_clk_wiz : entity is "clk100_to_25_clk_wiz";
 end clk100_to_25_clk100_to_25_clk_wiz;
 
 architecture STRUCTURE of clk100_to_25_clk100_to_25_clk_wiz is

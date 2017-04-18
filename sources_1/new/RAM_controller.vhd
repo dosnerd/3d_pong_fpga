@@ -35,6 +35,7 @@ entity RAM_controller is
   Port (
         clk25, clk200 : in STD_LOGIC;
         X, Y: in STD_LOGIC_VECTOR (9 downto 0);
+        test_mode : in STD_LOGIC;
         pixel_left, pixel_right : out STD_LOGIC_VECTOR (11 downto 0)
   );
 end RAM_controller;
@@ -69,6 +70,15 @@ architecture Behavioral of RAM_controller is
     );
     end component;
     
+--    component ligths is
+--      Port ( 
+--            clk25 : in STD_LOGIC;
+--            X, Y : in STD_LOGIC_VECTOR (9 downto 0);
+--            X_ball, Y_ball, Z_left_ball : in integer;
+--            output_left, output_right : out STD_LOGIC_VECTOR (11 downto 0);
+--            empty_left, empty_right : out STD_LOGIC);
+--    end component;
+    
     SIGNAL color : STD_LOGIC_VECTOR (11 downto 0);
     SIGNAL x_index_con, y_index_con, z_index_con : INTEGER;
     
@@ -83,8 +93,8 @@ architecture Behavioral of RAM_controller is
     SIGNAL bat2_emtpy_left, bat2_emtpy_right : STD_LOGIC;
     SIGNAL bat2_opacity_left, bat2_opacity_right : STD_LOGIC;
     
-    SIGNAL background_pixel : STD_LOGIC_VECTOR (11 downto 0);
-    SIGNAL background_empty : STD_LOGIC;
+    SIGNAL background_pixel, ligth_pixel : STD_LOGIC_VECTOR (11 downto 0);
+    SIGNAL background_empty, ligth_empty : STD_LOGIC;
     
 begin
 
@@ -131,6 +141,17 @@ bat2_module: bat1 PORT MAP(
     opacity_right => bat2_opacity_right
 );
 
+--ligth: ligths PORT MAP(
+--    clk25 => clk25,
+--    X => X,
+--    Y => Y,
+--    X_ball => x_index_con,
+--    Y_ball => y_index_con,
+--    Z_left_ball  => z_index_con,
+--    output_left => ligth_pixel,
+--    empty_left => ligth_empty
+--);
+
 backgr: background PORT MAP(
     clk25 => clk25,
     X => X,
@@ -144,45 +165,47 @@ mover: process(clk25)
     variable dir_x, dir_y, dir_z : boolean := true;
 begin
     if (rising_edge(clk25)) then
-        prescaler := prescaler + 1;
+        if test_mode = '1' then
+            prescaler := prescaler + 1;
+                    
+            if (prescaler >= 3000000) then
+                prescaler := 0;
                 
-        if (prescaler >= 3000000) then
-            prescaler := 0;
+                if (x_index_con + 80 >= 320) then
+                    dir_x := false;
+                elsif (x_index_con - 80 <= -320) then
+                    dir_x := true;
+                end if;
             
-            if (x_index_con >= 320) then
-                dir_x := false;
-            elsif (x_index_con <= -320) then
-                dir_x := true;
-            end if;
-        
-            if (dir_x = true) then
-                x_index_con <= x_index_con + 20;
-            else
-                x_index_con <= x_index_con - 20;
-            end if;
+                if (dir_x = true) then
+                    x_index_con <= x_index_con + 60;
+                else
+                    x_index_con <= x_index_con - 60;
+                end if;
+                
+                if (y_index_con + 70 >= 240) then
+                    dir_y := false;
+                elsif (y_index_con - 70 <= -240) then
+                    dir_y := true;
+                end if;
             
-            if (y_index_con >= 240) then
-                dir_y := false;
-            elsif (y_index_con <= -240) then
-                dir_y := true;
-            end if;
-        
-            if (dir_y = true) then
-                y_index_con <= y_index_con + 40;
-            else
-                y_index_con <= y_index_con - 40;
-            end if;
+                if (dir_y = true) then
+                    y_index_con <= y_index_con + 40;
+                else
+                    y_index_con <= y_index_con - 40;
+                end if;
+                
+                if (z_index_con >= -8) then
+                    dir_z := false;
+                elsif (z_index_con <= -72) then
+                    dir_z := true;
+                end if;
             
-            if (z_index_con >= -1) then
-                dir_z := false;
-            elsif (z_index_con <= -9) then
-                dir_z := true;
-            end if;
-        
-            if (dir_z = true) then
-                z_index_con <= z_index_con + 1;
-            else
-                z_index_con <= z_index_con - 1;
+                if (dir_z = true) then
+                    z_index_con <= z_index_con + 2;
+                else
+                    z_index_con <= z_index_con - 2;
+                end if;
             end if;
         end if;
     end if;
@@ -198,6 +221,8 @@ begin
             left_color := ball_left;
         elsif (bat2_emtpy_left = '0') then
             left_color := bat2_left;
+--        elsif (ligth_empty = '0') then
+--            left_color := ligth_pixel;
         else
             left_color := background_pixel;
         end if;

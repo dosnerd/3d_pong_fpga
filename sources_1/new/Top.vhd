@@ -45,7 +45,9 @@ entity Top is
     vSync2 : out STD_LOGIC;
     vgaRed2 : out STD_LOGIC_VECTOR(3 downto 0);
     vgaGreen2 : out STD_LOGIC_VECTOR(3 downto 0);
-    vgaBlue2 : out STD_LOGIC_VECTOR(3 downto 0)
+    vgaBlue2 : out STD_LOGIC_VECTOR(3 downto 0);
+    
+    sw : in STD_LOGIC_VECTOR(15 downto 0)
     
     --debug
 --    reset : in STD_LOGIC;
@@ -79,6 +81,7 @@ architecture Behavioral of Top is
       Port (
             clk25, clk200 : in STD_LOGIC;
             X, Y : in STD_LOGIC_VECTOR (9 downto 0);
+            test_mode : in STD_LOGIC;
             pixel_left, pixel_right : out STD_LOGIC_VECTOR (11 downto 0)
       );
     end component;
@@ -122,6 +125,7 @@ ram: RAM_controller PORT MAP(
     clk200 => clk200,
     X => X,
     Y => Y,
+    test_mode => sw(0),
     pixel_left => pixel_left,
     pixel_right => pixel_right
 );
