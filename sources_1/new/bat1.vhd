@@ -38,6 +38,7 @@ entity bat1 is
         clk25 : in STD_LOGIC;
         X, Y : in STD_LOGIC_VECTOR (9 downto 0);
         x_index, y_index, z_index : in INTEGER;
+        color : STD_LOGIC_VECTOR (11 downto 0);
         out_left, out_right : out STD_LOGIC_VECTOR (11 downto 0);
         empty_left, empty_right, opacity_left, opacity_right : out STD_LOGIC
     );
@@ -91,14 +92,13 @@ begin
         
         if(xMem_left >= x_index_temp - width AND xMem_left < x_index_temp + width AND yMem_left >= y_index_temp - height AND yMem_left < y_index_temp + height) then
              if(xMem_left - 5 >= x_index_temp - width AND xMem_left + 5 < x_index_temp + width AND yMem_left - 5 >= y_index_temp - height AND yMem_left + 5 < y_index_temp + height) then
-                out_left(11 downto 8)  <= "0000";
-                out_left(7 downto 4) <= "1111";
-                out_left(3 downto 0) <= "1111";
+                out_left  <= color;
                 opacity_left <= '1';
             else
-                out_left(11 downto 8) <= "1111";
-                out_left(7 downto 4) <= "1111";
-                out_left(3 downto 0) <= "0000";
+                out_left <= color;
+--                out_left(11 downto 8) <= "1111";
+--                out_left(7 downto 4) <= "1111";
+--                out_left(3 downto 0) <= "0000";
                 opacity_left <= '0';
             end if;
             empty_left <= '0';   
@@ -108,14 +108,13 @@ begin
         
         if(xMem_right >= x_index_temp - width AND xMem_right < x_index_temp + width AND yMem_right >= y_index_temp - height AND yMem_right < y_index_temp + height) then
              if(xMem_right - 5 >= x_index_temp - width AND xMem_right + 5 < x_index_temp + width AND yMem_right - 5 >= y_index_temp - height AND yMem_right + 5 < y_index_temp + height) then
-                out_right(11 downto 8) <= "1111";
-                out_right(7 downto 4) <= "0000";
-                out_right(3 downto 0) <= "0000";                
+                out_right <= color;               
                 opacity_right <= '1';
             else
-                out_right(11 downto 8) <= "0000";
-                out_right(7 downto 4) <= "1111";
-                out_right(3 downto 0) <= "1111";
+                out_left <= color;
+--                out_right(11 downto 8) <= "0000";
+--                out_right(7 downto 4) <= "1111";
+--                out_right(3 downto 0) <= "1111";
                 opacity_right <= '0';
             end if;   
             empty_right <= '0'; 
