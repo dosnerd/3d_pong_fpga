@@ -38,6 +38,7 @@ entity RAM_controller is
         clk25, clk200 : in STD_LOGIC;
         X, Y: in STD_LOGIC_VECTOR (9 downto 0);
         test_mode : in STD_LOGIC;
+        infrared_ball : in STD_LOGIC;
         pixel_left, pixel_right : out STD_LOGIC_VECTOR (11 downto 0)
   );
 end RAM_controller;
@@ -223,33 +224,15 @@ end process;
 
 left: process(clk25)
     variable left_color, temp_color : STD_LOGIC_VECTOR (11 downto 0);
-    variable stop, merge : BOOLEAN;
 begin
     if (falling_edge(clk25)) then
-        stop := false;
-        merge := false;
         left_color := (others => '0');
-        if (bat1_emtpy_left = '0' and not stop) then
-            if (bat1_opacity_left = '1') then
-                merge := true;
-            else
-                stop := true;
-            end if;
-            left_color := bat1_left;
+        
+        if (background_empty = '0') then
+            left_color := background_pixel;
         end if;
-        if (ball_emtpy_left = '0' and not stop) then
-            if(merge = true) then
-                temp_color := ball_left;
-                left_color(11 downto 8) := ('0' & left_color(10 downto 8)) + ('0' & temp_color(10 downto 8)); 
-                left_color(7 downto 4) := ('0' & left_color(6 downto 4)) + ('0' & temp_color(6 downto 4)); 
-                left_color(3 downto 0) := ('0' & left_color(2 downto 0)) + ('0' & temp_color(2 downto 0));
-            else
-                left_color := ball_left;
-            end if;   
-             stop := true;
-        end if;
-        if (bat2_emtpy_left = '0' and not stop) then
-            if(merge = true) then
+        if (bat2_emtpy_left = '0') then
+            if (bat2_opacity_left = '1') then
                 temp_color := bat2_left; --merge
                 left_color(11 downto 8) := ('0' & left_color(10 downto 8)) + ('0' & temp_color(10 downto 8)); 
                 left_color(7 downto 4) := ('0' & left_color(6 downto 4)) + ('0' & temp_color(6 downto 4)); 
@@ -257,58 +240,38 @@ begin
             else
                 left_color := bat2_left;
             end if;
-            if (bat2_opacity_left = '1') then
-                merge := true;
-            else
-                stop := true;
+        end if;
+        if (ball_emtpy_left = '0') then
+            if (infrared_ball = '0' or bat1_emtpy_left = '0') then 
+                left_color := ball_left;
             end if;
         end if;
-        if (background_empty = '0' and not stop) then
-            if(merge = true) then
-                temp_color := background_pixel; --merge
+       if (bat1_emtpy_left = '0') then
+            if (bat1_opacity_left = '1') then
+                temp_color := bat1_left; --merge
                 left_color(11 downto 8) := ('0' & left_color(10 downto 8)) + ('0' & temp_color(10 downto 8)); 
                 left_color(7 downto 4) := ('0' & left_color(6 downto 4)) + ('0' & temp_color(6 downto 4)); 
-                left_color(3 downto 0) := ('0' & left_color(2 downto 0)) + ('0' & temp_color(2 downto 0)); 
+                left_color(3 downto 0) := ('0' & left_color(2 downto 0)) + ('0' & temp_color(2 downto 0));
             else
-                left_color := background_pixel;
+                left_color := bat1_left;
             end if;
-            stop := true;
-        end if;
---        elsif (ligth_empty = '0') then
---            left_color := ligth_pixel;
+        end if; 
+        
         pixel_left <= left_color; 
     end if;
 end process;
 
 right: process(clk25)
     variable right_color, temp_color : STD_LOGIC_VECTOR (11 downto 0);
-    variable stop, merge : BOOLEAN;
 begin
     if (falling_edge(clk25)) then
-        stop := false;
-        merge := false;
         right_color := (others => '0');
-        if (bat2_emtpy_right = '0' and not stop) then
-            if (bat2_opacity_right = '1') then
-                merge := true;
-            else
-                stop := true;
-            end if;
-            right_color := bat2_right;
+        
+        if (background_empty = '0') then
+                right_color := background_pixel;
         end if;
-        if (ball_emtpy_right = '0' and not stop) then
-            if(merge = true) then
-                temp_color := ball_right;
-                right_color(11 downto 8) := ('0' & right_color(10 downto 8)) + ('0' & temp_color(10 downto 8)); 
-                right_color(7 downto 4) := ('0' & right_color(6 downto 4)) + ('0' & temp_color(6 downto 4)); 
-                right_color(3 downto 0) := ('0' & right_color(2 downto 0)) + ('0' & temp_color(2 downto 0));
-            else
-                right_color := ball_right;
-            end if;   
-             stop := true;
-        end if;
-        if (bat1_emtpy_right = '0' and not stop) then
-            if(merge = true) then
+        if (bat1_emtpy_right = '0') then
+            if(bat1_opacity_right = '1') then
                 temp_color := bat1_right; --merge
                 right_color(11 downto 8) := ('0' & right_color(10 downto 8)) + ('0' & temp_color(10 downto 8)); 
                 right_color(7 downto 4) := ('0' & right_color(6 downto 4)) + ('0' & temp_color(6 downto 4)); 
@@ -316,25 +279,23 @@ begin
             else
                 right_color := bat1_right;
             end if;
-            if (bat1_opacity_right = '1') then
-                merge := true;
-            else
-                stop := true;
+        end if;
+        if (ball_emtpy_right = '0') then
+            if (infrared_ball = '0' or bat2_emtpy_right = '0') then
+                right_color := ball_right;
             end if;
         end if;
-        if (background_empty = '0' and not stop) then
-            if(merge = true) then
-                temp_color := background_pixel; --merge
+        if (bat2_emtpy_right = '0') then
+            if(bat2_opacity_right = '1') then
+                temp_color := bat2_right; --merge
                 right_color(11 downto 8) := ('0' & right_color(10 downto 8)) + ('0' & temp_color(10 downto 8)); 
                 right_color(7 downto 4) := ('0' & right_color(6 downto 4)) + ('0' & temp_color(6 downto 4)); 
                 right_color(3 downto 0) := ('0' & right_color(2 downto 0)) + ('0' & temp_color(2 downto 0)); 
             else
-                right_color := background_pixel;
+                right_color := bat2_right;
             end if;
-            stop := true;
         end if;
---        elsif (ligth_empty = '0') then
---            right_color := ligth_pixel;
+        
         pixel_right <= right_color; 
     end if;
 end process;

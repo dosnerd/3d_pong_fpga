@@ -82,6 +82,7 @@ architecture Behavioral of Top is
             clk25, clk200 : in STD_LOGIC;
             X, Y : in STD_LOGIC_VECTOR (9 downto 0);
             test_mode : in STD_LOGIC;
+            infrared_ball : in STD_LOGIC;
             pixel_left, pixel_right : out STD_LOGIC_VECTOR (11 downto 0)
       );
     end component;
@@ -126,6 +127,7 @@ ram: RAM_controller PORT MAP(
     X => X,
     Y => Y,
     test_mode => sw(0),
+    infrared_ball => sw(1),
     pixel_left => pixel_left,
     pixel_right => pixel_right
 );

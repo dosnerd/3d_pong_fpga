@@ -98,6 +98,19 @@ begin
         b2_left := b2_left**2;
         c2_left := a2_left + b2_left;
         
+        if abs(xMem_right) <= 320 AND abs(xMem_right)+4 >= 320 and abs(yMem_right) <= 240 then
+            out_right(11 downto 8) <= "0000";
+            out_right(7 downto 4) <= "1111";
+            out_right(3 downto 0) <= "0000";
+            empty_right <= '0';
+        end if;
+        if abs(yMem_right) <= 240 AND abs(yMem_right)+4 >= 240 and abs(xMem_right) <= 320 then
+            out_right(11 downto 8) <= "0000";
+            out_right(7 downto 4) <= "0000";
+            out_right(3 downto 0) <= "1111";
+            empty_right <= '0';
+        end if;
+        
         if(c2_left <= size_bal) then
                 out_left(11 downto 8) <= "0000";
                 out_left(7 downto 4) <= "0000";
@@ -106,8 +119,8 @@ begin
         end if;
         
         if(c2_right <= size_bal) then
-                out_right(11 downto 8) <= "0000";
-                out_right(7 downto 4) <= "1111";
+                out_right(11 downto 8) <= "1111";
+                out_right(7 downto 4) <= "0000";
                 out_right(3 downto 0) <= "0000";
                 empty_right <= '0';
         else

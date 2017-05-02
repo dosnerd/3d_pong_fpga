@@ -69,9 +69,9 @@ begin
         zx := 10240 /  abs(x_center);
         zy := 7680 /  abs(y_center);        
         
-        buff(11 downto 8) <= "1111";
-        buff(7 downto 4) <= "1111";
-        buff(3 downto 0) <= "1111";
+        buff(11 downto 8) <= "0111";
+        buff(7 downto 4) <= "0011";
+        buff(3 downto 0) <= "0101";
 
         --buff <= (others => '1');
         for i in 0 to 4 loop
@@ -83,13 +83,13 @@ begin
             yMem := yMem / 8;
             
             if (abs(xMem) <= 320 AND abs(xMem) >= 320-size AND abs(yMem) <= 240) then
-                buff(11 downto 8) <= "0000";
+                buff(11 downto 8) <= "1111";
                 buff(7 downto 4) <= "0000";
                 buff(3 downto 0) <= "0000";
                 empty <= '0';
             end if;
             if (abs(yMem) <= 240 AND abs(yMem) >= 240-size AND abs(xMem) <= 320) then
-                buff(11 downto 8) <= "0000";
+                buff(11 downto 8) <= "1111";
                 buff(7 downto 4) <= "0000";
                 buff(3 downto 0) <= "0000";
                 empty <= '0';
@@ -100,7 +100,7 @@ begin
         if  zx >= 32 AND zx <= 288 AND zx = zy then
             buff(11 downto 8) <= "0000";
             buff(7 downto 4) <= "0000";
-            buff(3 downto 0) <= "0000";
+            buff(3 downto 0) <= "1111";
             empty <= '0';
         end if;
         
@@ -111,9 +111,9 @@ begin
         yMem := yMem / 8;
         
         if (abs(yMem) <= 240-size AND abs(xMem) <= 320-size) then
-            buff(11 downto 8) <= "1111";
-            buff(7 downto 4) <= "1111";
-            buff(3 downto 0) <= "1111";
+            buff(11 downto 8) <= "0000";
+            buff(7 downto 4) <= "0111";
+            buff(3 downto 0) <= "0000";
             empty <= '0';
         end if;
     end if;
