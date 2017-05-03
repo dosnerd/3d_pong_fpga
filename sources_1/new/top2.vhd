@@ -2,9 +2,9 @@
 -- Company: 
 -- Engineer: 
 -- 
--- Create Date: 14.03.2017 13:19:11
+-- Create Date: 11.04.2017 19:17:26
 -- Design Name: 
--- Module Name: Top - Behavioral
+-- Module Name: top2 - Behavioral
 -- Project Name: 
 -- Target Devices: 
 -- Tool Versions: 
@@ -31,34 +31,25 @@ use IEEE.STD_LOGIC_1164.ALL;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
-entity Top is
-  Port ( 
-    clk100 : in STD_LOGIC;
-    Hsync : out STD_LOGIC;
-    vSync : out STD_LOGIC;
-    vgaRed : out STD_LOGIC_VECTOR(3 downto 0);
-    vgaGreen : out STD_LOGIC_VECTOR(3 downto 0);
-    vgaBlue : out STD_LOGIC_VECTOR(3 downto 0);
-    
-    
-    Hsync2 : out STD_LOGIC;
-    vSync2 : out STD_LOGIC;
-    vgaRed2 : out STD_LOGIC_VECTOR(3 downto 0);
-    vgaGreen2 : out STD_LOGIC_VECTOR(3 downto 0);
-    vgaBlue2 : out STD_LOGIC_VECTOR(3 downto 0);
-    
-    sw : in STD_LOGIC_VECTOR(15 downto 0)
-    
-    --debug
---    reset : in STD_LOGIC;
---    spriteColor : in STD_LOGIC_VECTOR (12 downto 0);
---    pixelOut : out STD_LOGIC_VECTOR (11 downto 0);
---    spriteAddr : out STD_LOGIC_VECTOR (2 downto 0)
-    
-  );
-end Top;
+entity top2 is
+    Port ( 
+        clk100 : in STD_LOGIC;
+        Hsync : out STD_LOGIC;
+        vSync : out STD_LOGIC;
+        vgaRed : out STD_LOGIC_VECTOR(3 downto 0);
+        vgaGreen : out STD_LOGIC_VECTOR(3 downto 0);
+        vgaBlue : out STD_LOGIC_VECTOR(3 downto 0);
+        
+        
+        Hsync2 : out STD_LOGIC;
+        vSync2 : out STD_LOGIC;
+        vgaRed2 : out STD_LOGIC_VECTOR(3 downto 0);
+        vgaGreen2 : out STD_LOGIC_VECTOR(3 downto 0);
+        vgaBlue2 : out STD_LOGIC_VECTOR(3 downto 0)
+    );
+end top2;
 
-architecture Behavioral of Top is
+architecture Behavioral of top2 is
     component VGA_controller is
         Port ( 
                clk_in : in STD_LOGIC;
@@ -69,6 +60,7 @@ architecture Behavioral of Top is
                position_y : out STD_LOGIC_VECTOR (9 downto 0);
                position_x : out STD_LOGIC_VECTOR (9 downto 0));
     end component;
+    
     component clk100_to_25 is
         Port (
                clk_out1 : out STD_LOGIC;
@@ -77,19 +69,19 @@ architecture Behavioral of Top is
         );
     end component;
     
-    component RAM_controller is
-      Port (
-            clk25, clk200 : in STD_LOGIC;
+    component background is
+        Port ( 
+            clk25 : in STD_LOGIC;
             X, Y : in STD_LOGIC_VECTOR (9 downto 0);
-            test_mode : in STD_LOGIC;
-            pixel_left, pixel_right : out STD_LOGIC_VECTOR (11 downto 0)
-      );
+            output : out STD_LOGIC_VECTOR (11 downto 0);
+            empty: out STD_LOGIC
+        );
     end component;
-
+    
     SIGNAL clk25 : STD_LOGIC;
     SIGNAL clk200 : STD_LOGIC;
     SIGNAL X, Y : STD_LOGIC_VECTOR (9 downto 0);
-    SIGNAL pixel_left, pixel_right : STD_LOGIC_VECTOR (11 downto 0);
+    SIGNAL pixel_left : STD_LOGIC_VECTOR (11 downto 0);
 begin
 
 clk_div1: clk100_to_25 PORT MAP (
@@ -110,24 +102,11 @@ VGAleft: VGA_controller PORT MAP (
     position_y => Y
 );
 
-VGAright: VGA_controller PORT MAP (    
-    clk_in => clk25,
-    sprite_color => pixel_right,
-    set_rgb(3 downto 0) => vgaRed2, 
-    set_rgb(7 downto 4) => vgaGreen2, 
-    set_rgb(11 downto 8) => vgaBlue2, 
-    hsync => Hsync2,
-    vsync => vSync2
-);
-
-ram: RAM_controller PORT MAP(
+backgr: background PORT MAP(
     clk25 => clk25,
-    clk200 => clk200,
     X => X,
     Y => Y,
-    test_mode => sw(0),
-    pixel_left => pixel_left,
-    pixel_right => pixel_right
+    output => pixel_left
 );
 
 end Behavioral;
