@@ -37,6 +37,8 @@ entity RAM_controller is
   Port (
         clk25, clk200 : in STD_LOGIC;
         X, Y: in STD_LOGIC_VECTOR (9 downto 0);
+        SPI : in STD_LOGIC_VECTOR(15 downto 0);
+        SPI_E : in STD_LOGIC;
         test_mode : in STD_LOGIC;
         infrared_ball : in STD_LOGIC;
         pixel_left, pixel_right : out STD_LOGIC_VECTOR (11 downto 0)
@@ -170,6 +172,13 @@ backgr: background PORT MAP(
     output => background_pixel,
     empty => background_empty
 );
+
+spi_decode: process(clk25)
+begin
+    if (rising_edge(clk25)) then
+        
+    end if;
+end process;
 
 mover: process(clk25)
     variable prescaler : integer := -1000;

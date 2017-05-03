@@ -33,6 +33,10 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity Top is
   Port ( 
+    SPI_data    : in STD_LOGIC;
+    SPI_clock   : in STD_LOGIC;
+    SPI_ss      : in STD_LOGIC;
+  
     clk100 : in STD_LOGIC;
     Hsync : out STD_LOGIC;
     vSync : out STD_LOGIC;
@@ -47,8 +51,8 @@ entity Top is
     vgaGreen2 : out STD_LOGIC_VECTOR(3 downto 0);
     vgaBlue2 : out STD_LOGIC_VECTOR(3 downto 0);
     
-    sw : in STD_LOGIC_VECTOR(15 downto 0)
-    
+    sw : in STD_LOGIC_VECTOR(15 downto 0);
+    led : out STD_LOGIC_VECTOR(15 downto 0)
     --debug
 --    reset : in STD_LOGIC;
 --    spriteColor : in STD_LOGIC_VECTOR (12 downto 0);
@@ -59,6 +63,15 @@ entity Top is
 end Top;
 
 architecture Behavioral of Top is
+    component SPI is
+        Port ( 
+               clk_in   : in STD_LOGIC;
+               data_in  : in STD_LOGIC;
+               clock_in : in STD_LOGIC;
+               SS       : in STD_LOGIC;
+               data_out : out STD_LOGIC_VECTOR (15 downto 0);
+               led_out  : out STD_LOGIC_VECTOR (15 downto 0));
+    end component;
     component VGA_controller is
         Port ( 
                clk_in : in STD_LOGIC;
@@ -91,7 +104,18 @@ architecture Behavioral of Top is
     SIGNAL clk200 : STD_LOGIC;
     SIGNAL X, Y : STD_LOGIC_VECTOR (9 downto 0);
     SIGNAL pixel_left, pixel_right : STD_LOGIC_VECTOR (11 downto 0);
+    SIGNAL SPI_databus     : STD_LOGIC_VECTOR(15 downto 0);
+    
 begin
+
+communication: SPI port map(
+    clk_in => clk200,
+    data_in => SPI_data,
+    clock_in => SPI_clock,
+    SS => SPI_ss,
+    data_out => SPI_databus,
+    led_out => led
+);
 
 clk_div1: clk100_to_25 PORT MAP (
     clk_in1 => clk100,
