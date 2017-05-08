@@ -33,54 +33,27 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity SPI is
     Port ( 
-           clk_in       : in STD_LOGIC;
            data_in      : in STD_LOGIC;
            clock_in     : in STD_LOGIC;
            SS           : in STD_LOGIC;
            data_ready   : out STD_LOGIC;
-           data_out     : out STD_LOGIC_VECTOR(15 downto 0);
-           led_out      : out STD_LOGIC_VECTOR(15 downto 0)
+           data_out     : out STD_LOGIC_VECTOR(15 downto 0)
            );
 end SPI;
 
 architecture Behavioral of SPI is
+    signal buff : STD_LOGIC_VECTOR(15 downto 0);
 begin
 
+    data_out <= buff when SS = '1';
+    data_ready <= ss; 
+
 process(clock_in)
-    variable t : boolean := true;
 begin
 if (rising_edge(clock_in)) then
-    if (t) then
-        t := false;
-        led_out(0) <= '1';
-    else
-        t := true;
-        led_out(0) <= '0';
-        
+    if (SS = '0') then
+        buff <= buff(14 downto 0) & data_in;
     end if;
 end if;
 end process;
-
---process(clk_in)
---    variable buff : STD_LOGIC_VECTOR(15 downto 0);
---    variable counter : INTEGER;
---    variable last_ss, last_clock : STD_LOGIC;
---begin
---if rising_edge(clk_in) then
---    if (clock_in = '1' AND last_clock = '0') then
---        buff := data_in & buff(15 downto 1);
---        data_ready <= '0';
---    end if;
---    if (ss = '0' AND last_ss = '1') then
---       data_out <= buff;  
---       --led_out <= buff;
---       data_ready <= '1';
---    end if;
---last_clock := clock_in;              
---last_ss := ss;
---led_out(0) <= ss;
---led_out(1) <= clock_in;
---end if;
-
---end process;
 end Behavioral;

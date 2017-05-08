@@ -41,7 +41,8 @@ entity RAM_controller is
         SPI_E : in STD_LOGIC;
         test_mode : in STD_LOGIC;
         infrared_ball : in STD_LOGIC;
-        pixel_left, pixel_right : out STD_LOGIC_VECTOR (11 downto 0)
+        pixel_left, pixel_right : out STD_LOGIC_VECTOR (11 downto 0);
+        led_out      : out STD_LOGIC_VECTOR(15 downto 0)
   );
 end RAM_controller;
 
@@ -84,11 +85,14 @@ architecture Behavioral of RAM_controller is
 --            output_left, output_right : out STD_LOGIC_VECTOR (11 downto 0);
 --            empty_left, empty_right : out STD_LOGIC);
 --    end component;
+
+    SIGNAL address : STD_LOGIC_VECTOR(3 downto 0);
+    SIGNAL data : STD_LOGIC_VECTOR(11 downto 0);
     
     SIGNAL color : STD_LOGIC_VECTOR (11 downto 0);
-    SIGNAL x_index_con, y_index_con, z_index_con : INTEGER;
---    SIGNAL x_index_bal, y_index_bal, z_index_bal : INTEGER; --update them if
---    SIGNAL x_index_con2, y_index_con2, z_index_con2 : INTEGER; --update them if
+    SIGNAL x_index_bat1, y_index_bat1, z_index_bat1 : INTEGER;
+    SIGNAL x_index_ball, y_index_ball, z_index_ball : INTEGER; --update them if
+    SIGNAL x_index_bat2, y_index_bat2, z_index_bat2 : INTEGER; --update them if
     
     SIGNAL ball_left, ball_right : STD_LOGIC_VECTOR (11 downto 0);
     SIGNAL ball_emtpy_left, ball_emtpy_right : STD_LOGIC;
@@ -107,15 +111,20 @@ architecture Behavioral of RAM_controller is
     SIGNAL player1_color : STD_LOGIC_VECTOR(11 downto 0) := b"1111_1111_0000";
     SIGNAL player2_color : STD_LOGIC_VECTOR(11 downto 0) := b"0000_1111_1111";
     
+    SIGNAL player1_score : STD_LOGIC_VECTOR(11 downto 0);
+    SIGNAL player2_score : STD_LOGIC_VECTOR(11 downto 0);
+    
+    SIGNAL state_reg : STD_LOGIC_VECTOR(11 downto 0);
+    
 begin
 
 ball_module: ball PORT MAP(
     clk25 => clk25,
     X => X,
     Y => Y,
-    x_index => x_index_con,
-    y_index => y_index_con,
-    z_index => z_index_con,
+    x_index => x_index_ball,
+    y_index => y_index_ball,
+    z_index => z_index_ball,
     out_left => ball_left,
     out_right => ball_right,
     empty_left => ball_emtpy_left,
@@ -126,8 +135,8 @@ bat1_module: bat1 PORT MAP(
     clk25 => clk25,
     X => X,
     Y => Y,
-    x_index => x_index_con,
-    y_index => y_index_con,
+    x_index => x_index_bat1,
+    y_index => y_index_bat1,
     z_index => -1,
     color => player1_color,
     out_left => bat1_left,
@@ -142,8 +151,8 @@ bat2_module: bat1 PORT MAP(
     clk25 => clk25,
     X => X,
     Y => Y,
-    x_index => x_index_con,
-    y_index => y_index_con,
+    x_index => x_index_bat2,
+    y_index => y_index_bat2,
     z_index => -9,
     color => player2_color,
     out_left => bat2_left,
@@ -173,11 +182,93 @@ backgr: background PORT MAP(
     empty => background_empty
 );
 
-spi_decode: process(clk25)
+spi_decode: process(clk200)
+    variable prescaler : integer := -1000;
+variable dir_x, dir_y, dir_z : boolean := true;
 begin
-    if (rising_edge(clk25)) then
-        
+    if (rising_edge(clk200)) then
+        if(SPI_E = '1') then
+            address <= SPI(15 downto 12);
+            data <= SPI(11 downto 0);
+            led_out <= SPI;
+            if(test_mode = '0') then
+                if (address = "0001") then -- ball:x
+                   x_index_ball <= to_integer(unsigned(data)); 
+                elsif (address = "0010") then -- ball:y
+                   y_index_ball <= to_integer(unsigned(data));  
+                elsif (address = "0011") then -- ball:z
+                   z_index_ball <= to_integer(unsigned(data));           
+                elsif (address = "0100") then -- player:1:x
+                   x_index_bat1 <= to_integer(unsigned(data));  
+                elsif (address = "0101") then -- player:1:y
+                   y_index_bat1 <= to_integer(unsigned(data));
+                elsif (address = "0110") then -- player:2:x
+                   x_index_bat2 <= to_integer(unsigned(data));
+                elsif (address = "0111") then -- player:2:y
+                   y_index_bat2 <= to_integer(unsigned(data));        
+                elsif (address = "1000") then -- player:1:score
+                   player1_score <= data;
+                elsif (address = "1001") then -- player:2:score
+                   player2_score <= data;
+                end if;
+            end if;
+           if (address = "1111") then --State Reg
+               state_reg <= data;
+            end if;
+        end if;
+        if(test_mode = '1') then
+                    prescaler := prescaler + 1;
+                            
+                    if (prescaler >= 3000000) then
+                        prescaler := 0;
+                        
+                        if (x_index_ball + 80 >= 320) then
+                            dir_x := false;
+                        elsif (x_index_ball - 80 <= -320) then
+                            dir_x := true;
+                        end if;
+                    
+                        if (dir_x = true) then
+                            x_index_ball <= x_index_ball + 60;
+                            x_index_bat1 <= x_index_bat1 + 60;
+                            x_index_bat2 <= x_index_bat2 + 60;
+                        else
+                            x_index_ball <= x_index_ball - 60;
+                            x_index_bat1 <= x_index_bat1 - 60;
+                            x_index_bat2 <= x_index_bat2 - 60;
+                        end if;
+                        
+                        if (y_index_ball + 70 >= 240) then
+                            dir_y := false;
+                        elsif (y_index_ball - 70 <= -240) then
+                            dir_y := true;
+                        end if;
+                    
+                        if (dir_y = true) then
+                            y_index_ball <= y_index_ball + 40;
+                            y_index_bat1 <= y_index_bat1 + 40;
+                            y_index_bat2 <= y_index_bat2 + 40;
+                        else
+                            y_index_ball <= y_index_ball - 40;
+                            y_index_bat1 <= y_index_bat1 - 40;
+                            y_index_bat2 <= y_index_bat2 - 40;
+                        end if;
+                        
+                        if (z_index_ball >= -8) then
+                            dir_z := false;
+                        elsif (z_index_ball <= -72) then
+                            dir_z := true;
+                        end if;
+                    
+                        if (dir_z = true) then
+                            z_index_ball <= z_index_ball + 2;
+                        else
+                            z_index_ball <= z_index_ball - 2;
+                        end if;
+                    end if;
+        end if;
     end if;
+
 end process;
 
 mover: process(clk25)
@@ -185,49 +276,57 @@ mover: process(clk25)
     variable dir_x, dir_y, dir_z : boolean := true;
 begin
     if (rising_edge(clk25)) then
-        if test_mode = '1' then
-            prescaler := prescaler + 1;
+--        if test_mode = '1' then
+--            prescaler := prescaler + 1;
                     
-            if (prescaler >= 3000000) then
-                prescaler := 0;
+--            if (prescaler >= 3000000) then
+--                prescaler := 0;
                 
-                if (x_index_con + 80 >= 320) then
-                    dir_x := false;
-                elsif (x_index_con - 80 <= -320) then
-                    dir_x := true;
-                end if;
+--                if (x_index_ball + 80 >= 320) then
+--                    dir_x := false;
+--                elsif (x_index_ball - 80 <= -320) then
+--                    dir_x := true;
+--                end if;
             
-                if (dir_x = true) then
-                    x_index_con <= x_index_con + 60;
-                else
-                    x_index_con <= x_index_con - 60;
-                end if;
+--                if (dir_x = true) then
+--                    x_index_ball <= x_index_ball + 60;
+--                    x_index_bat1 <= x_index_bat1 + 60;
+--                    x_index_bat2 <= x_index_bat2 + 60;
+--                else
+--                    x_index_ball <= x_index_ball - 60;
+--                    x_index_bat1 <= x_index_bat1 - 60;
+--                    x_index_bat2 <= x_index_bat2 - 60;
+--                end if;
                 
-                if (y_index_con + 70 >= 240) then
-                    dir_y := false;
-                elsif (y_index_con - 70 <= -240) then
-                    dir_y := true;
-                end if;
+--                if (y_index_ball + 70 >= 240) then
+--                    dir_y := false;
+--                elsif (y_index_ball - 70 <= -240) then
+--                    dir_y := true;
+--                end if;
             
-                if (dir_y = true) then
-                    y_index_con <= y_index_con + 40;
-                else
-                    y_index_con <= y_index_con - 40;
-                end if;
+--                if (dir_y = true) then
+--                    y_index_ball <= y_index_ball + 40;
+--                    y_index_bat1 <= y_index_bat1 + 40;
+--                    y_index_bat2 <= y_index_bat2 + 40;
+--                else
+--                    y_index_ball <= y_index_ball - 40;
+--                    y_index_bat1 <= y_index_bat1 - 40;
+--                    y_index_bat2 <= y_index_bat2 - 40;
+--                end if;
                 
-                if (z_index_con >= -8) then
-                    dir_z := false;
-                elsif (z_index_con <= -72) then
-                    dir_z := true;
-                end if;
+--                if (z_index_ball >= -8) then
+--                    dir_z := false;
+--                elsif (z_index_ball <= -72) then
+--                    dir_z := true;
+--                end if;
             
-                if (dir_z = true) then
-                    z_index_con <= z_index_con + 2;
-                else
-                    z_index_con <= z_index_con - 2;
-                end if;
-            end if;
-        end if;
+--                if (dir_z = true) then
+--                    z_index_ball <= z_index_ball + 2;
+--                else
+--                    z_index_ball <= z_index_ball - 2;
+--                end if;
+--            end if;
+--        end if;
     end if;
 end process;
 

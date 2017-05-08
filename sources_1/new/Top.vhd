@@ -65,12 +65,11 @@ end Top;
 architecture Behavioral of Top is
     component SPI is
         Port ( 
-               clk_in   : in STD_LOGIC;
-               data_in  : in STD_LOGIC;
-               clock_in : in STD_LOGIC;
-               SS       : in STD_LOGIC;
-               data_out : out STD_LOGIC_VECTOR (15 downto 0);
-               led_out  : out STD_LOGIC_VECTOR (15 downto 0));
+                data_in      : in STD_LOGIC;
+                clock_in     : in STD_LOGIC;
+                SS           : in STD_LOGIC;
+                data_ready   : out STD_LOGIC;
+                data_out     : out STD_LOGIC_VECTOR(15 downto 0));
     end component;
     component VGA_controller is
         Port ( 
@@ -92,11 +91,14 @@ architecture Behavioral of Top is
     
     component RAM_controller is
       Port (
-            clk25, clk200 : in STD_LOGIC;
-            X, Y : in STD_LOGIC_VECTOR (9 downto 0);
-            test_mode : in STD_LOGIC;
-            infrared_ball : in STD_LOGIC;
-            pixel_left, pixel_right : out STD_LOGIC_VECTOR (11 downto 0)
+          clk25, clk200 : in STD_LOGIC;
+          X, Y: in STD_LOGIC_VECTOR (9 downto 0);
+          SPI : in STD_LOGIC_VECTOR(15 downto 0);
+          SPI_E : in STD_LOGIC;
+          test_mode : in STD_LOGIC;
+          infrared_ball : in STD_LOGIC;
+          pixel_left, pixel_right : out STD_LOGIC_VECTOR (11 downto 0);
+          led_out      : out STD_LOGIC_VECTOR(15 downto 0)
       );
     end component;
 
@@ -104,17 +106,17 @@ architecture Behavioral of Top is
     SIGNAL clk200 : STD_LOGIC;
     SIGNAL X, Y : STD_LOGIC_VECTOR (9 downto 0);
     SIGNAL pixel_left, pixel_right : STD_LOGIC_VECTOR (11 downto 0);
-    SIGNAL SPI_databus     : STD_LOGIC_VECTOR(15 downto 0);
+    SIGNAL SPI_databus : STD_LOGIC_VECTOR(15 downto 0);
+    SIGNAL SPI_CLOCK_TEMP, SPI_TEMP_SS, SPI_READY : STD_LOGIC;
     
 begin
 
 communication: SPI port map(
-    clk_in => clk200,
     data_in => SPI_data,
-    clock_in => SPI_clock,
-    SS => SPI_ss,
-    data_out => SPI_databus,
-    led_out => led
+    clock_in => SPI_CLOCK_TEMP,
+    SS => SPI_TEMP_SS,
+    data_ready => SPI_READY,
+    data_out => SPI_databus
 );
 
 clk_div1: clk100_to_25 PORT MAP (
@@ -148,12 +150,30 @@ VGAright: VGA_controller PORT MAP (
 ram: RAM_controller PORT MAP(
     clk25 => clk25,
     clk200 => clk200,
+    SPI => spi_databus,
+    SPI_E => SPI_ready,
     X => X,
     Y => Y,
     test_mode => sw(0),
     infrared_ball => sw(1),
     pixel_left => pixel_left,
-    pixel_right => pixel_right
+    pixel_right => pixel_right,
+    led_out => led
 );
+
+process(clk100) 
+    variable temp_clk, temp_ss: STD_LOGIC_VECTOR(2 downto 0);
+begin
+    if rising_edge(clk100) then
+        temp_clk(2 downto 0) := temp_clk(1 downto 0) & spi_clock;
+        if(temp_clk(2) = temp_clk(1) AND temp_clk(1) = temp_clk(0)) then
+            SPI_CLOCK_TEMP <= temp_clk(0);
+        end if; 
+        temp_ss(2 downto 0) := temp_ss(1 downto 0) & spi_ss;
+        if(temp_ss(2) = temp_ss(1) AND temp_ss(1) = temp_ss(0)) then
+            SPI_TEMP_SS <= temp_ss(0);
+        end if;
+    end if;
+end process;
 
 end Behavioral;
