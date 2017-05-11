@@ -39,8 +39,7 @@ entity RAM_controller is
         X, Y: in STD_LOGIC_VECTOR (9 downto 0);
         SPI : in STD_LOGIC_VECTOR(15 downto 0);
         SPI_E : in STD_LOGIC;
-        test_mode : in STD_LOGIC;
-        infrared_ball : in STD_LOGIC;
+        test_mode : in STD_LOGIC_VECTOR(15 downto 0);
         pixel_left, pixel_right : out STD_LOGIC_VECTOR (11 downto 0);
         led_out      : out STD_LOGIC_VECTOR(15 downto 0)
   );
@@ -76,15 +75,6 @@ architecture Behavioral of RAM_controller is
         empty: out STD_LOGIC
     );
     end component;
-    
---    component ligths is
---      Port ( 
---            clk25 : in STD_LOGIC;
---            X, Y : in STD_LOGIC_VECTOR (9 downto 0);
---            X_ball, Y_ball, Z_left_ball : in integer;
---            output_left, output_right : out STD_LOGIC_VECTOR (11 downto 0);
---            empty_left, empty_right : out STD_LOGIC);
---    end component;
 
     SIGNAL address : STD_LOGIC_VECTOR(3 downto 0);
     SIGNAL data : STD_LOGIC_VECTOR(11 downto 0);
@@ -101,9 +91,17 @@ architecture Behavioral of RAM_controller is
     SIGNAL bat1_emtpy_left, bat1_emtpy_right : STD_LOGIC;
     SIGNAL bat1_opacity_left, bat1_opacity_right : STD_LOGIC;
     
+    SIGNAL bat1_left2, bat1_right2 : STD_LOGIC_VECTOR (11 downto 0);
+    SIGNAL bat1_emtpy_left2, bat1_emtpy_right2 : STD_LOGIC;
+    SIGNAL bat1_opacity_left2, bat1_opacity_right2 : STD_LOGIC;
+    
     SIGNAL bat2_left, bat2_right : STD_LOGIC_VECTOR (11 downto 0);
     SIGNAL bat2_emtpy_left, bat2_emtpy_right : STD_LOGIC;
     SIGNAL bat2_opacity_left, bat2_opacity_right : STD_LOGIC;
+    
+    SIGNAL bat2_left2, bat2_right2 : STD_LOGIC_VECTOR (11 downto 0);
+    SIGNAL bat2_emtpy_left2, bat2_emtpy_right2 : STD_LOGIC;
+    SIGNAL bat2_opacity_left2, bat2_opacity_right2 : STD_LOGIC;
     
     SIGNAL background_pixel, ligth_pixel : STD_LOGIC_VECTOR (11 downto 0);
     SIGNAL background_empty, ligth_empty : STD_LOGIC;
@@ -147,6 +145,22 @@ bat1_module: bat1 PORT MAP(
     opacity_right => bat1_opacity_right
 );
 
+bat1_module2: bat1 PORT MAP(
+    clk25 => clk25,
+    X => X,
+    Y => Y,
+    x_index => x_index_bat1,
+    y_index => y_index_bat1,
+    z_index => -4,
+    color => player1_color,
+    out_left => bat1_left2,
+    out_right => bat1_right2,
+    empty_left => bat1_emtpy_left2,
+    empty_right => bat1_emtpy_right2,
+    opacity_left => bat1_opacity_left2, 
+    opacity_right => bat1_opacity_right2
+);
+
 bat2_module: bat1 PORT MAP(
     clk25 => clk25,
     X => X,
@@ -163,16 +177,21 @@ bat2_module: bat1 PORT MAP(
     opacity_right => bat2_opacity_right
 );
 
---ligth: ligths PORT MAP(
---    clk25 => clk25,
---    X => X,
---    Y => Y,
---    X_ball => x_index_con,
---    Y_ball => y_index_con,
---    Z_left_ball  => z_index_con,
---    output_left => ligth_pixel,
---    empty_left => ligth_empty
---);
+bat2_module2: bat1 PORT MAP(
+    clk25 => clk25,
+    X => X,
+    Y => Y,
+    x_index => x_index_bat2,
+    y_index => y_index_bat2,
+    z_index => -6,
+    color => player2_color,
+    out_left => bat2_left2,
+    out_right => bat2_right2,
+    empty_left => bat2_emtpy_left2,
+    empty_right => bat2_emtpy_right2,
+    opacity_left => bat2_opacity_left2, 
+    opacity_right => bat2_opacity_right2
+);
 
 backgr: background PORT MAP(
     clk25 => clk25,
@@ -182,30 +201,31 @@ backgr: background PORT MAP(
     empty => background_empty
 );
 
-spi_decode: process(clk200)
+spi_decode: process(clk25)
     variable prescaler : integer := -1000;
 variable dir_x, dir_y, dir_z : boolean := true;
 begin
-    if (rising_edge(clk200)) then
+    if (rising_edge(clk25)) then
         if(SPI_E = '1') then
             address <= SPI(15 downto 12);
             data <= SPI(11 downto 0);
             led_out <= SPI;
-            if(test_mode = '0') then
+--            state_reg(6) <= '1';
+            if(test_mode(0) = '0') then
                 if (address = "0001") then -- ball:x
-                   x_index_ball <= to_integer(unsigned(data)); 
+                   x_index_ball <= to_integer(signed(data)); 
                 elsif (address = "0010") then -- ball:y
-                   y_index_ball <= to_integer(unsigned(data));  
+                   y_index_ball <= to_integer(signed(data));  
                 elsif (address = "0011") then -- ball:z
-                   z_index_ball <= to_integer(unsigned(data));           
+                   z_index_ball <= to_integer(signed(data));           
                 elsif (address = "0100") then -- player:1:x
-                   x_index_bat1 <= to_integer(unsigned(data));  
+                   x_index_bat1 <= to_integer(signed(data));  
                 elsif (address = "0101") then -- player:1:y
-                   y_index_bat1 <= to_integer(unsigned(data));
+                   y_index_bat1 <= to_integer(signed(data));
                 elsif (address = "0110") then -- player:2:x
-                   x_index_bat2 <= to_integer(unsigned(data));
+                   x_index_bat2 <= to_integer(signed(data));
                 elsif (address = "0111") then -- player:2:y
-                   y_index_bat2 <= to_integer(unsigned(data));        
+                   y_index_bat2 <= to_integer(signed(data));        
                 elsif (address = "1000") then -- player:1:score
                    player1_score <= data;
                 elsif (address = "1001") then -- player:2:score
@@ -216,118 +236,60 @@ begin
                state_reg <= data;
             end if;
         end if;
-        if(test_mode = '1') then
-                    prescaler := prescaler + 1;
-                            
-                    if (prescaler >= 3000000) then
-                        prescaler := 0;
-                        
-                        if (x_index_ball + 80 >= 320) then
-                            dir_x := false;
-                        elsif (x_index_ball - 80 <= -320) then
-                            dir_x := true;
-                        end if;
+        
+        if(test_mode(0) = '1' OR state_reg(0) = '1') then
+            prescaler := prescaler + 1;
                     
-                        if (dir_x = true) then
-                            x_index_ball <= x_index_ball + 60;
-                            x_index_bat1 <= x_index_bat1 + 60;
-                            x_index_bat2 <= x_index_bat2 + 60;
-                        else
-                            x_index_ball <= x_index_ball - 60;
-                            x_index_bat1 <= x_index_bat1 - 60;
-                            x_index_bat2 <= x_index_bat2 - 60;
-                        end if;
-                        
-                        if (y_index_ball + 70 >= 240) then
-                            dir_y := false;
-                        elsif (y_index_ball - 70 <= -240) then
-                            dir_y := true;
-                        end if;
-                    
-                        if (dir_y = true) then
-                            y_index_ball <= y_index_ball + 40;
-                            y_index_bat1 <= y_index_bat1 + 40;
-                            y_index_bat2 <= y_index_bat2 + 40;
-                        else
-                            y_index_ball <= y_index_ball - 40;
-                            y_index_bat1 <= y_index_bat1 - 40;
-                            y_index_bat2 <= y_index_bat2 - 40;
-                        end if;
-                        
-                        if (z_index_ball >= -8) then
-                            dir_z := false;
-                        elsif (z_index_ball <= -72) then
-                            dir_z := true;
-                        end if;
-                    
-                        if (dir_z = true) then
-                            z_index_ball <= z_index_ball + 2;
-                        else
-                            z_index_ball <= z_index_ball - 2;
-                        end if;
-                    end if;
+            if (prescaler >= 4000000) then
+                prescaler := 0;
+                
+                if (x_index_ball + 80 >= 320) then
+                    dir_x := false;
+                elsif (x_index_ball - 80 <= -320) then
+                    dir_x := true;
+                end if;
+            
+                if (dir_x = true) then
+                    x_index_ball <= x_index_ball + 60;
+                    x_index_bat1 <= x_index_bat1 + 60;
+                    x_index_bat2 <= x_index_bat2 + 60;
+                else
+                    x_index_ball <= x_index_ball - 60;
+                    x_index_bat1 <= x_index_bat1 - 60;
+                    x_index_bat2 <= x_index_bat2 - 60;
+                end if;
+                
+                if (y_index_ball + 70 >= 240) then
+                    dir_y := false;
+                elsif (y_index_ball - 70 <= -240) then
+                    dir_y := true;
+                end if;
+            
+                if (dir_y = true) then
+                    y_index_ball <= y_index_ball + 40;
+                    y_index_bat1 <= y_index_bat1 + 40;
+                    y_index_bat2 <= y_index_bat2 + 40;
+                else
+                    y_index_ball <= y_index_ball - 40;
+                    y_index_bat1 <= y_index_bat1 - 40;
+                    y_index_bat2 <= y_index_bat2 - 40;
+                end if;
+                
+                if (z_index_ball >= -8) then
+                    dir_z := false;
+                elsif (z_index_ball <= -72) then
+                    dir_z := true;
+                end if;
+            
+                if (dir_z = true) then
+                    z_index_ball <= z_index_ball + 2;
+                else
+                    z_index_ball <= z_index_ball - 2;
+                end if;
+            end if;
         end if;
     end if;
 
-end process;
-
-mover: process(clk25)
-    variable prescaler : integer := -1000;
-    variable dir_x, dir_y, dir_z : boolean := true;
-begin
-    if (rising_edge(clk25)) then
---        if test_mode = '1' then
---            prescaler := prescaler + 1;
-                    
---            if (prescaler >= 3000000) then
---                prescaler := 0;
-                
---                if (x_index_ball + 80 >= 320) then
---                    dir_x := false;
---                elsif (x_index_ball - 80 <= -320) then
---                    dir_x := true;
---                end if;
-            
---                if (dir_x = true) then
---                    x_index_ball <= x_index_ball + 60;
---                    x_index_bat1 <= x_index_bat1 + 60;
---                    x_index_bat2 <= x_index_bat2 + 60;
---                else
---                    x_index_ball <= x_index_ball - 60;
---                    x_index_bat1 <= x_index_bat1 - 60;
---                    x_index_bat2 <= x_index_bat2 - 60;
---                end if;
-                
---                if (y_index_ball + 70 >= 240) then
---                    dir_y := false;
---                elsif (y_index_ball - 70 <= -240) then
---                    dir_y := true;
---                end if;
-            
---                if (dir_y = true) then
---                    y_index_ball <= y_index_ball + 40;
---                    y_index_bat1 <= y_index_bat1 + 40;
---                    y_index_bat2 <= y_index_bat2 + 40;
---                else
---                    y_index_ball <= y_index_ball - 40;
---                    y_index_bat1 <= y_index_bat1 - 40;
---                    y_index_bat2 <= y_index_bat2 - 40;
---                end if;
-                
---                if (z_index_ball >= -8) then
---                    dir_z := false;
---                elsif (z_index_ball <= -72) then
---                    dir_z := true;
---                end if;
-            
---                if (dir_z = true) then
---                    z_index_ball <= z_index_ball + 2;
---                else
---                    z_index_ball <= z_index_ball - 2;
---                end if;
---            end if;
---        end if;
-    end if;
 end process;
 
 left: process(clk25)
@@ -339,7 +301,7 @@ begin
         if (background_empty = '0') then
             left_color := background_pixel;
         end if;
-        if (bat2_emtpy_left = '0') then
+        if (bat2_emtpy_left = '0' AND (state_reg(5) = '0' AND test_mode(5) = '0')) then
             if (bat2_opacity_left = '1') then
                 temp_color := bat2_left; --merge
                 left_color(11 downto 8) := ('0' & left_color(10 downto 8)) + ('0' & temp_color(10 downto 8)); 
@@ -349,11 +311,47 @@ begin
                 left_color := bat2_left;
             end if;
         end if;
-        if (ball_emtpy_left = '0') then
-            if (infrared_ball = '0' or bat1_emtpy_left = '0') then 
+
+        if (ball_emtpy_left = '0' AND z_index_ball < -56) then
+            if ((test_mode(1) = '0' AND state_reg(1) = '0') or bat1_emtpy_left = '0') then 
                 left_color := ball_left;
             end if;
-        end if;
+        end if;    
+        
+        if (bat2_emtpy_left2 = '0' AND (state_reg(6) = '1' or test_mode(6) = '1') AND (state_reg(5) = '0' AND test_mode(5) = '0')) then
+            if (bat2_opacity_left2 = '1') then
+                temp_color := bat2_left2; --merge
+                left_color(11 downto 8) := ('0' & left_color(10 downto 8)) + ('0' & temp_color(10 downto 8)); 
+                left_color(7 downto 4) := ('0' & left_color(6 downto 4)) + ('0' & temp_color(6 downto 4)); 
+                left_color(3 downto 0) := ('0' & left_color(2 downto 0)) + ('0' & temp_color(2 downto 0)); 
+            else
+                left_color := bat2_left2;
+            end if;
+       end if; 
+       
+        if (ball_emtpy_left = '0' AND z_index_ball < -36 AND z_index_ball > -56) then
+            if ((test_mode(1) = '0' AND state_reg(1) = '0') or bat1_emtpy_left = '0') then 
+                left_color := ball_left;
+            end if;
+        end if;  
+        
+        if (bat1_emtpy_left2 = '0' AND (state_reg(6) = '1' or test_mode(6) = '1')) then
+            if (bat1_opacity_left2 = '1') then
+                temp_color := bat1_left2; --merge
+                left_color(11 downto 8) := ('0' & left_color(10 downto 8)) + ('0' & temp_color(10 downto 8)); 
+                left_color(7 downto 4) := ('0' & left_color(6 downto 4)) + ('0' & temp_color(6 downto 4)); 
+                left_color(3 downto 0) := ('0' & left_color(2 downto 0)) + ('0' & temp_color(2 downto 0));
+            else
+                left_color := bat1_left2;
+            end if;
+        end if; 
+        
+       if (ball_emtpy_left = '0' AND z_index_ball > -36) then
+            if ((test_mode(1) = '0' AND state_reg(1) = '0') or bat1_emtpy_left = '0') then 
+                left_color := ball_left;
+            end if;
+        end if;   
+            
        if (bat1_emtpy_left = '0') then
             if (bat1_opacity_left = '1') then
                 temp_color := bat1_left; --merge
@@ -363,8 +361,7 @@ begin
             else
                 left_color := bat1_left;
             end if;
-        end if; 
-        
+        end if;
         pixel_left <= left_color; 
     end if;
 end process;
@@ -378,7 +375,7 @@ begin
         if (background_empty = '0') then
                 right_color := background_pixel;
         end if;
-        if (bat1_emtpy_right = '0') then
+        if (bat1_emtpy_right = '0' AND (state_reg(5) = '0' AND test_mode(5) = '0')) then
             if(bat1_opacity_right = '1') then
                 temp_color := bat1_right; --merge
                 right_color(11 downto 8) := ('0' & right_color(10 downto 8)) + ('0' & temp_color(10 downto 8)); 
@@ -388,8 +385,38 @@ begin
                 right_color := bat1_right;
             end if;
         end if;
-        if (ball_emtpy_right = '0') then
-            if (infrared_ball = '0' or bat2_emtpy_right = '0') then
+        if (ball_emtpy_right = '0' AND z_index_ball > -36) then
+            if ((test_mode(1) = '0' AND state_reg(1) = '0') or bat2_emtpy_right = '0') then
+                right_color := ball_right;
+            end if;
+        end if;
+        if (bat1_emtpy_right2 = '0' AND (state_reg(6) = '1' or test_mode(6) = '1') AND (state_reg(5) = '0' AND test_mode(5) = '0')) then
+            if(bat1_opacity_right2 = '1') then
+                temp_color := bat1_right2; --merge
+                right_color(11 downto 8) := ('0' & right_color(10 downto 8)) + ('0' & temp_color(10 downto 8)); 
+                right_color(7 downto 4) := ('0' & right_color(6 downto 4)) + ('0' & temp_color(6 downto 4)); 
+                right_color(3 downto 0) := ('0' & right_color(2 downto 0)) + ('0' & temp_color(2 downto 0)); 
+            else
+                right_color := bat1_right2;
+            end if;
+        end if;
+        if (ball_emtpy_right = '0' AND z_index_ball < -36 AND z_index_ball > -56) then
+            if ((test_mode(1) = '0' AND state_reg(1) = '0') or bat2_emtpy_right = '0') then
+                right_color := ball_right;
+            end if;
+        end if;
+        if (bat2_emtpy_right2 = '0' AND (state_reg(6) = '1' or test_mode(6) = '1')) then
+            if(bat2_opacity_right2 = '1') then
+                temp_color := bat2_right2; --merge
+                right_color(11 downto 8) := ('0' & right_color(10 downto 8)) + ('0' & temp_color(10 downto 8)); 
+                right_color(7 downto 4) := ('0' & right_color(6 downto 4)) + ('0' & temp_color(6 downto 4)); 
+                right_color(3 downto 0) := ('0' & right_color(2 downto 0)) + ('0' & temp_color(2 downto 0)); 
+            else
+                right_color := bat2_right2;
+            end if;
+        end if;
+        if (ball_emtpy_right = '0' AND z_index_ball < -56) then
+            if ((test_mode(1) = '0' AND state_reg(1) = '0') or bat2_emtpy_right = '0') then
                 right_color := ball_right;
             end if;
         end if;
@@ -403,7 +430,6 @@ begin
                 right_color := bat2_right;
             end if;
         end if;
-        
         pixel_right <= right_color; 
     end if;
 end process;

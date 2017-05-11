@@ -95,8 +95,7 @@ architecture Behavioral of Top is
           X, Y: in STD_LOGIC_VECTOR (9 downto 0);
           SPI : in STD_LOGIC_VECTOR(15 downto 0);
           SPI_E : in STD_LOGIC;
-          test_mode : in STD_LOGIC;
-          infrared_ball : in STD_LOGIC;
+          test_mode : in STD_LOGIC_VECTOR(15 downto 0);
           pixel_left, pixel_right : out STD_LOGIC_VECTOR (11 downto 0);
           led_out      : out STD_LOGIC_VECTOR(15 downto 0)
       );
@@ -107,12 +106,12 @@ architecture Behavioral of Top is
     SIGNAL X, Y : STD_LOGIC_VECTOR (9 downto 0);
     SIGNAL pixel_left, pixel_right : STD_LOGIC_VECTOR (11 downto 0);
     SIGNAL SPI_databus : STD_LOGIC_VECTOR(15 downto 0);
-    SIGNAL SPI_CLOCK_TEMP, SPI_TEMP_SS, SPI_READY : STD_LOGIC;
+    SIGNAL SPI_CLOCK_TEMP, SPI_TEMP_SS, SPI_READY, SPI_DATA_IN : STD_LOGIC;
     
 begin
 
 communication: SPI port map(
-    data_in => SPI_data,
+    data_in => SPI_DATA_IN,
     clock_in => SPI_CLOCK_TEMP,
     SS => SPI_TEMP_SS,
     data_ready => SPI_READY,
@@ -154,15 +153,14 @@ ram: RAM_controller PORT MAP(
     SPI_E => SPI_ready,
     X => X,
     Y => Y,
-    test_mode => sw(0),
-    infrared_ball => sw(1),
+    test_mode => sw,
     pixel_left => pixel_left,
     pixel_right => pixel_right,
     led_out => led
 );
 
 process(clk100) 
-    variable temp_clk, temp_ss: STD_LOGIC_VECTOR(2 downto 0);
+    variable temp_clk, temp_ss, temp_data : STD_LOGIC_VECTOR(2 downto 0);
 begin
     if rising_edge(clk100) then
         temp_clk(2 downto 0) := temp_clk(1 downto 0) & spi_clock;
@@ -173,6 +171,10 @@ begin
         if(temp_ss(2) = temp_ss(1) AND temp_ss(1) = temp_ss(0)) then
             SPI_TEMP_SS <= temp_ss(0);
         end if;
+        temp_data(2 downto 0) := temp_data(1 downto 0) & spi_data;
+        if(temp_data(2) = temp_data(1) AND temp_data(1) = temp_data(0)) then
+            SPI_DATA_IN <= temp_data(0);
+        end if; 
     end if;
 end process;
 
