@@ -90,7 +90,8 @@ architecture Behavioral of Top_3 is
     SIGNAL addr_temp1 : STD_LOGIC_VECTOR(10 downto 0);
     SIGNAL addr_temp2 : STD_LOGIC_VECTOR(7 downto 0);
     SIGNAL addr_r_temp, addr_w_temp : STD_LOGIC_VECTOR(11 downto 0);
-    SIGNAL data_temp, char_w_temp, char_r_temp : STD_LOGIC_VECTOR(7 downto 0);
+    SIGNAL data_temp : STD_LOGIC_VECTOR(0 to 7);
+    SIGNAL char_w_temp, char_r_temp : STD_LOGIC_VECTOR(7 downto 0);
     SIGNAL char_e_temp : STD_LOGIC;
     
 begin
@@ -147,21 +148,3 @@ begin
 end process;
 
 end Behavioral;
-
---        if (bitInChar = 8) then
---            bitInChar := 0;
---            column := column + 1;
---            if (column = 128) then
---                column := 0;
---                bitInRow := bitInRow + 1;
---                if (bitInRow = 16) then
---                    row := row + 1;
---                    bitInRow := 0;
---                    if (row = 31) then
---                        row := 0;
---                    end if;
---                end if;
---            end if;
---        end if;
-
---        bitInChar := bitInChar + 1;
