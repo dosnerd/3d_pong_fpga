@@ -388,3 +388,7 @@ set_property IOSTANDARD LVCMOS33 [get_ports SPI_ss]
 set_property PACKAGE_PIN G2 [get_ports SPI_data]
 set_property PACKAGE_PIN H2 [get_ports SPI_ss]
 set_property PACKAGE_PIN G3 [get_ports SPI_clock]
+
+set_property BITSTREAM.GENERAL.COMPRESS TRUE [current_design]
+set_property BITSTREAM.CONFIG.CONFIGRATE 33 [current_design]
+set_property CONFIG_MODE SPIx4 [current_design]

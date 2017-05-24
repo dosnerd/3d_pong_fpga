@@ -52,13 +52,7 @@ entity Top is
     vgaBlue2 : out STD_LOGIC_VECTOR(3 downto 0);
     
     sw : in STD_LOGIC_VECTOR(15 downto 0);
-    led : out STD_LOGIC_VECTOR(15 downto 0)
-    --debug
---    reset : in STD_LOGIC;
---    spriteColor : in STD_LOGIC_VECTOR (12 downto 0);
---    pixelOut : out STD_LOGIC_VECTOR (11 downto 0);
---    spriteAddr : out STD_LOGIC_VECTOR (2 downto 0)
-    
+    led : out STD_LOGIC_VECTOR(15 downto 0) 
   );
 end Top;
 
