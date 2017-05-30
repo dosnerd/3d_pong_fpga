@@ -130,15 +130,14 @@ char_mem_test: char_mem PORT MAP (
 );
 
 process(clk25) --loop
-    variable bitInChar, column, bitInRow, row : integer := 0;
+    variable bitInChar, column, bitInRow, row, temp_x, temp_y : integer := 0;
 begin
     if (rising_edge(clk25)) then
         row := to_integer(unsigned(Y(9 downto 4)));
-        column := to_integer(unsigned(X(9 downto 3)));
-        addr_r_temp <= std_logic_vector(to_unsigned(row * 128 + column, 12));
+        column := to_integer(unsigned(X(9 downto 3)));        
     end if;
     if (falling_edge(clk25)) then
-        addr_temp1 <= addr_temp2(6 downto 0) & Y(3 downto 0);
+        addr_r_temp <= std_logic_vector(to_unsigned((row * 128) + column, 12));
         if (data_temp(to_integer(unsigned(X(2 downto 0)))) = '1') then
             pixel_left <= "000011110000";
         else 

@@ -1,30 +1,51 @@
--- VGA Character Memory
---
--- This memory can store 128x32 characters where each character is
--- 8 bits. The memory is dual ported providing a port
--- to read the characters and a port to write the characters.
---
+----------------------------------------------------------------------------------
+-- Company: 
+-- Engineer: 
 -- 
+-- Create Date: 05/30/2017 02:05:24 PM
+-- Design Name: 
+-- Module Name: color_mem - Behavioral
+-- Project Name: 
+-- Target Devices: 
+-- Tool Versions: 
+-- Description: 
+-- 
+-- Dependencies: 
+-- 
+-- Revision:
+-- Revision 0.01 - File Created
+-- Additional Comments:
+-- 
+----------------------------------------------------------------------------------
 
-library ieee;
-use ieee.std_logic_1164.all;
-use ieee.numeric_std.all;
 
-entity char_mem is
-   port(
-      clk: in std_logic;
-      char_read_addr : in std_logic_vector(11 downto 0);
-      char_write_addr: in std_logic_vector(11 downto 0);
-      char_we : in std_logic;
-      char_write_value : in std_logic_vector(7 downto 0);
-      char_read_value : out std_logic_vector(7 downto 0)
-   );
-end char_mem;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
 
-architecture Behavioral of char_mem is
+-- Uncomment the following library declaration if using
+-- arithmetic functions with Signed or Unsigned values
+use IEEE.NUMERIC_STD.ALL;
 
-   constant CHAR_RAM_ADDR_WIDTH: integer := 12; -- 2^7 X 2^5
-   constant CHAR_RAM_WIDTH: integer := 8;  -- 8 bits per character
+-- Uncomment the following library declaration if instantiating
+-- any Xilinx leaf cells in this code.
+--library UNISIM;
+--use UNISIM.VComponents.all;
+
+entity color_mem is
+    Port ( 
+        clk: in std_logic;
+        char_read_addr : in std_logic_vector(11 downto 0);
+        char_write_addr: in std_logic_vector(11 downto 0);
+        char_we : in std_logic;
+        char_write_value : in std_logic_vector(11 downto 0);
+        char_read_value : out std_logic_vector(11 downto 0)
+       );
+end color_mem;
+
+architecture Behavioral of color_mem is
+
+constant CHAR_RAM_ADDR_WIDTH: integer := 12; -- 2^7 X 2^5
+   constant CHAR_RAM_WIDTH: integer := 12;  -- 8 bits per character
    type char_ram_type is array (0 to 2**CHAR_RAM_ADDR_WIDTH-1)
      of std_logic_vector(CHAR_RAM_WIDTH-1 downto 0);
    signal read_a : std_logic_vector(11 downto 0);
@@ -328,7 +349,7 @@ begin
   -- character memory concurrent statement
   process(clk)
   begin
-    if falling_edge(clk) then
+    if rising_edge(clk) then
       if (char_we = '1') then
         char_ram(to_integer(unsigned(char_write_addr))) <= char_write_value;
       end if;

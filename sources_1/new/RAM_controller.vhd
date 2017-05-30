@@ -75,14 +75,28 @@ architecture Behavioral of RAM_controller is
         empty: out STD_LOGIC
     );
     end component;
+    
+    component TextController is
+          Port ( 
+          clk25 : in STD_LOGIC;
+          X, Y : in STD_LOGIC_VECTOR (9 downto 0);
+          writeEnable : in std_logic;
+          writeEnable2 : in std_logic;
+          writeAddress : in std_logic_vector(11 downto 0);
+          writeValue : in std_logic_vector(7 downto 0);
+          writeValue2 : in std_logic_vector(11 downto 0);
+          output : out STD_LOGIC_VECTOR (11 downto 0);
+          empty : out std_logic; 
+          menu : in std_logic
+        );
+    end component;
 
     SIGNAL address : STD_LOGIC_VECTOR(3 downto 0);
     SIGNAL data : STD_LOGIC_VECTOR(11 downto 0);
-    
-    SIGNAL color : STD_LOGIC_VECTOR (11 downto 0);
+ 
     SIGNAL x_index_bat1, y_index_bat1, z_index_bat1 : INTEGER;
-    SIGNAL x_index_ball, y_index_ball, z_index_ball : INTEGER; --update them if
-    SIGNAL x_index_bat2, y_index_bat2, z_index_bat2 : INTEGER; --update them if
+    SIGNAL x_index_ball, y_index_ball, z_index_ball : INTEGER; 
+    SIGNAL x_index_bat2, y_index_bat2, z_index_bat2 : INTEGER; 
     
     SIGNAL ball_left, ball_right : STD_LOGIC_VECTOR (11 downto 0);
     SIGNAL ball_emtpy_left, ball_emtpy_right : STD_LOGIC;
@@ -103,16 +117,20 @@ architecture Behavioral of RAM_controller is
     SIGNAL bat2_emtpy_left2, bat2_emtpy_right2 : STD_LOGIC;
     SIGNAL bat2_opacity_left2, bat2_opacity_right2 : STD_LOGIC;
     
-    SIGNAL background_pixel, ligth_pixel : STD_LOGIC_VECTOR (11 downto 0);
-    SIGNAL background_empty, ligth_empty : STD_LOGIC;
+    SIGNAL background_pixel : STD_LOGIC_VECTOR (11 downto 0);
+    SIGNAL background_empty : STD_LOGIC;
     
     SIGNAL player1_color : STD_LOGIC_VECTOR(11 downto 0) := b"1111_1111_0000";
     SIGNAL player2_color : STD_LOGIC_VECTOR(11 downto 0) := b"0000_1111_1111";
     
-    SIGNAL player1_score : STD_LOGIC_VECTOR(11 downto 0);
-    SIGNAL player2_score : STD_LOGIC_VECTOR(11 downto 0);
-    
     SIGNAL state_reg : STD_LOGIC_VECTOR(11 downto 0);
+    
+    SIGNAL text_pixel : STD_LOGIC_VECTOR (11 downto 0);
+    SIGNAL text_empty: STD_LOGIC;
+    SIGNAL textWriteEnable, textWriteEnable2 : std_logic;
+    SIGNAL TextWriteAddress : std_logic_vector(11 downto 0);
+    SIGNAL textWriteValue : std_logic_vector(7 downto 0);
+    SIGNAL textWriteValue2 : std_logic_vector(11 downto 0);
     
 begin
 
@@ -201,6 +219,38 @@ backgr: background PORT MAP(
     empty => background_empty
 );
 
+text_viewer: TextController PORT MAP(
+    clk25 => clk25,
+    X => X,
+    Y => Y,
+    writeEnable => textWriteEnable,
+    writeEnable2 => textWriteEnable2,
+    writeAddress => textWriteAddress,
+    writeValue => textWriteValue,
+    writeValue2 => textWriteValue2,
+    output => text_pixel,
+    empty => text_empty,
+    menu => state_reg(3)
+);
+
+text_write: process(clk25)
+begin
+    if rising_edge(clk25) then
+        textWriteEnable <= '0';
+        if(SPI_E = '1') then
+            if (address = "1000") then
+                textWriteAddress <= data;
+            elsif (address = "1001") then
+                textWriteValue <= data(7 downto 0);
+                textWriteEnable <= '1';
+            elsif (address = "1010") then
+                textWriteValue2 <= data(11 downto 0);
+                textWriteEnable2 <= '1';
+            end if;
+        end if;
+    end if;
+end process;
+
 spi_decode: process(clk25)
     variable prescaler : integer := -1000;
 variable dir_x, dir_y, dir_z : boolean := true;
@@ -209,8 +259,7 @@ begin
         if(SPI_E = '1') then
             address <= SPI(15 downto 12);
             data <= SPI(11 downto 0);
-            led_out <= SPI;
---            state_reg(6) <= '1';
+            --led_out <= SPI;
             if(test_mode(0) = '0') then
                 if (address = "0001") then -- ball:x
                    x_index_ball <= to_integer(signed(data)); 
@@ -226,10 +275,6 @@ begin
                    x_index_bat2 <= to_integer(signed(data));
                 elsif (address = "0111") then -- player:2:y
                    y_index_bat2 <= to_integer(signed(data));        
-                elsif (address = "1000") then -- player:1:score
-                   player1_score <= data;
-                elsif (address = "1001") then -- player:2:score
-                   player2_score <= data;
                 end if;
             end if;
            if (address = "1111") then --State Reg
@@ -312,7 +357,7 @@ begin
             end if;
         end if;
 
-        if (ball_emtpy_left = '0' AND z_index_ball < -56) then
+        if (ball_emtpy_left = '0' AND z_index_ball <= -56) then
             if ((test_mode(1) = '0' AND state_reg(1) = '0') or bat1_emtpy_left = '0') then 
                 left_color := ball_left;
             end if;
@@ -329,7 +374,7 @@ begin
             end if;
        end if; 
        
-        if (ball_emtpy_left = '0' AND z_index_ball < -36 AND z_index_ball > -56) then
+        if (ball_emtpy_left = '0' AND z_index_ball <= -36 AND z_index_ball >= -56) then
             if ((test_mode(1) = '0' AND state_reg(1) = '0') or bat1_emtpy_left = '0') then 
                 left_color := ball_left;
             end if;
@@ -346,7 +391,7 @@ begin
             end if;
         end if; 
         
-       if (ball_emtpy_left = '0' AND z_index_ball > -36) then
+       if (ball_emtpy_left = '0' AND z_index_ball >= -36) then
             if ((test_mode(1) = '0' AND state_reg(1) = '0') or bat1_emtpy_left = '0') then 
                 left_color := ball_left;
             end if;
@@ -361,6 +406,10 @@ begin
             else
                 left_color := bat1_left;
             end if;
+        end if;
+        
+        if (text_empty = '0') then
+            left_color := text_pixel;
         end if;
         pixel_left <= left_color; 
     end if;
@@ -385,7 +434,7 @@ begin
                 right_color := bat1_right;
             end if;
         end if;
-        if (ball_emtpy_right = '0' AND z_index_ball > -36) then
+        if (ball_emtpy_right = '0' AND z_index_ball >= -36) then
             if ((test_mode(1) = '0' AND state_reg(1) = '0') or bat2_emtpy_right = '0') then
                 right_color := ball_right;
             end if;
@@ -400,7 +449,7 @@ begin
                 right_color := bat1_right2;
             end if;
         end if;
-        if (ball_emtpy_right = '0' AND z_index_ball < -36 AND z_index_ball > -56) then
+        if (ball_emtpy_right = '0' AND z_index_ball <= -36 AND z_index_ball >= -56) then
             if ((test_mode(1) = '0' AND state_reg(1) = '0') or bat2_emtpy_right = '0') then
                 right_color := ball_right;
             end if;
@@ -415,7 +464,7 @@ begin
                 right_color := bat2_right2;
             end if;
         end if;
-        if (ball_emtpy_right = '0' AND z_index_ball < -56) then
+        if (ball_emtpy_right = '0' AND z_index_ball <= -56) then
             if ((test_mode(1) = '0' AND state_reg(1) = '0') or bat2_emtpy_right = '0') then
                 right_color := ball_right;
             end if;
@@ -429,6 +478,10 @@ begin
             else
                 right_color := bat2_right;
             end if;
+        end if;
+        
+        if (text_empty = '0') then
+            right_color := text_pixel;
         end if;
         pixel_right <= right_color; 
     end if;
