@@ -274,7 +274,11 @@ begin
                 elsif (address = "0110") then -- player:2:x
                    x_index_bat2 <= to_integer(signed(data));
                 elsif (address = "0111") then -- player:2:y
-                   y_index_bat2 <= to_integer(signed(data));        
+                   y_index_bat2 <= to_integer(signed(data));
+                elsif (address = "1101") then -- player:1:color
+                   player1_color <= data;
+                elsif (address = "1110") then -- player:2:color
+                   player2_color <= data;                           
                 end if;
             end if;
            if (address = "1111") then --State Reg
