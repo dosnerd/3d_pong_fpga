@@ -94,9 +94,12 @@ architecture Behavioral of RAM_controller is
     SIGNAL address : STD_LOGIC_VECTOR(3 downto 0);
     SIGNAL data : STD_LOGIC_VECTOR(11 downto 0);
  
-    SIGNAL x_index_bat1, y_index_bat1, z_index_bat1 : INTEGER;
-    SIGNAL x_index_ball, y_index_ball, z_index_ball : INTEGER; 
-    SIGNAL x_index_bat2, y_index_bat2, z_index_bat2 : INTEGER; 
+    SIGNAL x_index_bat1, y_index_bat1 : INTEGER := 0;
+    SIGNAL z_index_bat1 : INTEGER;
+    SIGNAL x_index_ball, y_index_ball : INTEGER := 0; 
+    SIGNAL z_index_ball : INTEGER := -4; 
+    SIGNAL x_index_bat2, y_index_bat2 : INTEGER := 0; 
+    SIGNAL z_index_bat2 : INTEGER; 
     
     SIGNAL ball_left, ball_right : STD_LOGIC_VECTOR (11 downto 0);
     SIGNAL ball_emtpy_left, ball_emtpy_right : STD_LOGIC;
