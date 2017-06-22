@@ -33,24 +33,37 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity Top is
   Port ( 
+    SPI_data    : in STD_LOGIC;
+    SPI_clock   : in STD_LOGIC;
+    SPI_ss      : in STD_LOGIC;
+  
     clk100 : in STD_LOGIC;
     Hsync : out STD_LOGIC;
     vSync : out STD_LOGIC;
     vgaRed : out STD_LOGIC_VECTOR(3 downto 0);
     vgaGreen : out STD_LOGIC_VECTOR(3 downto 0);
-    vgaBlue : out STD_LOGIC_VECTOR(3 downto 0)
+    vgaBlue : out STD_LOGIC_VECTOR(3 downto 0);
+    
+    
+    Hsync2 : out STD_LOGIC;
+    vSync2 : out STD_LOGIC;
+    vgaRed2 : out STD_LOGIC_VECTOR(3 downto 0);
+    vgaGreen2 : out STD_LOGIC_VECTOR(3 downto 0);
+    vgaBlue2 : out STD_LOGIC_VECTOR(3 downto 0);
+    
+    sw : in STD_LOGIC_VECTOR(15 downto 0);
+    led : out STD_LOGIC_VECTOR(15 downto 0) 
   );
 end Top;
 
 architecture Behavioral of Top is
-
-    component PixelSelect is
-        Port ( VGAx : in STD_LOGIC_VECTOR (9 downto 0);
-           VGAy : in STD_LOGIC_VECTOR (9 downto 0);
-           spriteColor : in STD_LOGIC_VECTOR (15 downto 0);
-           clk100 : in STD_LOGIC;
-           pixelOut : out STD_LOGIC_VECTOR (11 downto 0);
-           spriteAddr : out STD_LOGIC_VECTOR (2 downto 0));
+    component SPI is
+        Port ( 
+                data_in      : in STD_LOGIC;
+                clock_in     : in STD_LOGIC;
+                SS           : in STD_LOGIC;
+                data_ready   : out STD_LOGIC;
+                data_out     : out STD_LOGIC_VECTOR(15 downto 0));
     end component;
     component VGA_controller is
         Port ( 
@@ -65,89 +78,98 @@ architecture Behavioral of Top is
     component clk100_to_25 is
         Port (
                clk_out1 : out STD_LOGIC;
+               clk_out2 : out STD_LOGIC;
                clk_in1 : in STD_LOGIC
         );
     end component;
-    component ram_controller is
-        Port ( VGAleft : in STD_LOGIC_VECTOR (19 downto 0);
-               VGAright : in STD_LOGIC_VECTOR (19 downto 0);
-               addr_left : in STD_LOGIC_VECTOR (2 downto 0);
-               addr_right : in STD_LOGIC_VECTOR (2 downto 0);
-               addr_spi : in STD_LOGIC_VECTOR (19 downto 0);
-               data_spi : in STD_LOGIC_VECTOR (15 downto 0);
-               data_left : out STD_LOGIC_VECTOR (15 downto 0);
-               data_right : out STD_LOGIC_VECTOR (15 downto 0));
+    
+    component RAM_controller is
+      Port (
+          clk25, clk200 : in STD_LOGIC;
+          X, Y: in STD_LOGIC_VECTOR (9 downto 0);
+          SPI : in STD_LOGIC_VECTOR(15 downto 0);
+          SPI_E : in STD_LOGIC;
+          test_mode : in STD_LOGIC_VECTOR(15 downto 0);
+          pixel_left, pixel_right : out STD_LOGIC_VECTOR (11 downto 0);
+          led_out      : out STD_LOGIC_VECTOR(15 downto 0)
+      );
     end component;
 
     SIGNAL clk25 : STD_LOGIC;
+    SIGNAL clk200 : STD_LOGIC;
+    SIGNAL X, Y : STD_LOGIC_VECTOR (9 downto 0);
+    SIGNAL pixel_left, pixel_right : STD_LOGIC_VECTOR (11 downto 0);
+    SIGNAL SPI_databus : STD_LOGIC_VECTOR(15 downto 0);
+    SIGNAL SPI_CLOCK_TEMP, SPI_TEMP_SS, SPI_READY, SPI_DATA_IN : STD_LOGIC;
     
-    SIGNAL VGAaddressLeft : STD_LOGIC_VECTOR(19 downto 0);
-    SIGNAL VGApixelLeft : STD_LOGIC_VECTOR (11 downto 0);
-    SIGNAl spriteColorLeft : STD_LOGIC_VECTOR (15 downto 0);
-    SIGNAL spriteAddressLeft : STD_LOGIC_VECTOR (2 downto 0);
-
-    SIGNAL VGAaddressRight : STD_LOGIC_VECTOR(19 downto 0);
-    SIGNAL VGApixelRight : STD_LOGIC_VECTOR (11 downto 0);
-    SIGNAl spriteColorRight : STD_LOGIC_VECTOR (15 downto 0);
-    SIGNAL spriteAddressRight : STD_LOGIC_VECTOR (2 downto 0);
 begin
+
+communication: SPI port map(
+    data_in => SPI_DATA_IN,
+    clock_in => SPI_CLOCK_TEMP,
+    SS => SPI_TEMP_SS,
+    data_ready => SPI_READY,
+    data_out => SPI_databus
+);
+
 clk_div1: clk100_to_25 PORT MAP (
     clk_in1 => clk100,
-    clk_out1 => clk25
-);
-
-ram: ram_controller PORT MAP (
-    VGAleft => VGAaddressLeft,
-    VGAright => VGAaddressRight,
-    addr_left => spriteAddressLeft,
-    addr_right => spriteAddressRight,
-    addr_spi => (others => '0'),
-    data_spi => (others => '0'),
-    
-    data_left => spriteColorLeft,
-    data_right => spriteColorRight
-);
-
-PSleft: PixelSelect PORT MAP (
-    VGAx => VGAaddressLeft(9 downto 0),
-    VGAy => VGAaddressLeft(19 downto 10),
-    spriteColor => spriteColorLeft,
-    clk100 => clk100,
-    pixelOut => VGApixelLeft,
-    spriteAddr => spriteAddressLeft
+    clk_out1 => clk25,
+    clk_out2 => clk200
 );
 
 VGAleft: VGA_controller PORT MAP (    
     clk_in => clk25,
-    sprite_color => VGApixelLeft,
+    sprite_color => pixel_left,
     set_rgb(3 downto 0) => vgaRed, 
     set_rgb(7 downto 4) => vgaGreen, 
     set_rgb(11 downto 8) => vgaBlue, 
     hsync => Hsync,
-    vsync => Vsync,
-    position_x => VGAaddressLeft(9 downto 0),
-    position_y => VGAaddressLeft(19 downto 10)
-);
-
-PSright: PixelSelect PORT MAP (
-    VGAx => VGAaddressRight(9 downto 0),
-    VGAy => VGAaddressRight(19 downto 10),
-    spriteColor => spriteColorRight,
-    clk100 => clk100,
-    pixelOut => VGApixelRight,
-    spriteAddr => spriteAddressRight
+    vsync => vSync,
+    position_x => X,
+    position_y => Y
 );
 
 VGAright: VGA_controller PORT MAP (    
     clk_in => clk25,
-    sprite_color => VGApixelRight,
---    set_rgb(3 downto 0) => vgaRed, 
---    set_rgb(7 downto 4) => vgaGreen, 
---    set_rgb(11 downto 8) => vgaBlue, 
---    hsync => Hsync,
---    vsync => Vsync,
-    position_x => VGAaddressRight(9 downto 0),
-    position_y => VGAaddressRight(19 downto 10)
+    sprite_color => pixel_right,
+    set_rgb(3 downto 0) => vgaRed2, 
+    set_rgb(7 downto 4) => vgaGreen2, 
+    set_rgb(11 downto 8) => vgaBlue2, 
+    hsync => Hsync2,
+    vsync => vSync2
 );
+
+ram: RAM_controller PORT MAP(
+    clk25 => clk25,
+    clk200 => clk200,
+    SPI => spi_databus,
+    SPI_E => SPI_ready,
+    X => X,
+    Y => Y,
+    test_mode => sw,
+    pixel_left => pixel_left,
+    pixel_right => pixel_right,
+    led_out => led
+);
+
+process(clk100) 
+    variable temp_clk, temp_ss, temp_data : STD_LOGIC_VECTOR(2 downto 0);
+begin
+    if rising_edge(clk100) then
+        temp_clk(2 downto 0) := temp_clk(1 downto 0) & spi_clock;
+        if(temp_clk(2) = temp_clk(1) AND temp_clk(1) = temp_clk(0)) then
+            SPI_CLOCK_TEMP <= temp_clk(0);
+        end if; 
+        temp_ss(2 downto 0) := temp_ss(1 downto 0) & spi_ss;
+        if(temp_ss(2) = temp_ss(1) AND temp_ss(1) = temp_ss(0)) then
+            SPI_TEMP_SS <= temp_ss(0);
+        end if;
+        temp_data(2 downto 0) := temp_data(1 downto 0) & spi_data;
+        if(temp_data(2) = temp_data(1) AND temp_data(1) = temp_data(0)) then
+            SPI_DATA_IN <= temp_data(0);
+        end if; 
+    end if;
+end process;
 
 end Behavioral;
