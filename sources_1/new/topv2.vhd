@@ -36,7 +36,7 @@ entity topv2 is
         SPI_data    : in STD_LOGIC;
         SPI_clock   : in STD_LOGIC;
         SPI_ss      : in STD_LOGIC;
-        
+        led         : OUT STD_LOGIC_VECTOR(15 downto 0);
         --debub
         debug : out STD_LOGIC_VECTOR (15 downto 0)
   );
@@ -47,7 +47,9 @@ architecture Behavioral of topv2 is
         Port ( data_in  : in STD_LOGIC;
                clock_in : in STD_LOGIC;
                SS       : in STD_LOGIC;
-               data_out : out STD_LOGIC_VECTOR (15 downto 0));
+               data_out : out STD_LOGIC_VECTOR (15 downto 0);
+               led_out  : out STD_LOGIC_VECTOR(15 downto 0)
+               );
     end component;
     
     SIGNAL      SPI_databus     : STD_LOGIC_VECTOR(15 downto 0);
@@ -59,7 +61,8 @@ communication: SPI port map(
     data_in => SPI_data,
     clock_in => SPI_clock,
     SS => SPI_ss,
-    data_out => SPI_databus
+    data_out => SPI_databus,
+    led_out => led
 );
 
 end Behavioral;

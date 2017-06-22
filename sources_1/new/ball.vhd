@@ -37,16 +37,14 @@ entity ball is
     Port ( 
         clk25 : in STD_LOGIC;
         X, Y : in STD_LOGIC_VECTOR (9 downto 0);
-        x_index, y_index, z_index : INTEGER;
+        x_index, y_index, z_index : in INTEGER;
         out_left, out_right : out STD_LOGIC_VECTOR (11 downto 0);
         empty_left, empty_right : out STD_LOGIC
     );
 end ball;
 
 architecture Behavioral of ball is
-    --SIGNAL x_index, y_index : integer := 100; --"0100101100";
-    CONSTANT size_bal : integer := 800; -- "0001100011";
-    --SIGNAL z_index : integer := 5;
+    CONSTANT size_bal : integer := 800;
 begin
 
 main: process(clk25)
@@ -65,12 +63,29 @@ begin
         xMem_left := X_center * z_index;
         yMem_left := Y_center * z_index;
         
-        xMem_right := X_center * (21 + z_index);
-        yMem_right := Y_center * (-21 - z_index);
+        xMem_left := xMem_left / 8;
+        yMem_left := yMem_left / 8;
         
---        a2 := to_integer(signed(X_bal)) - xMem;
---        b2 := to_integer(signed(Y_bal)) - yMem;
-
+        xMem_right := X_center * (80 + z_index);
+        yMem_right := Y_center * (-80 - z_index);
+        
+        xMem_right := xMem_right / 8;
+        yMem_right := yMem_right / 8;
+        
+        empty_left <= '1';
+        if abs(xMem_left) <= 320 AND abs(xMem_left)+4 >= 320 and abs(yMem_left) <= 240 then
+            out_left(11 downto 8) <= "0000";
+            out_left(7 downto 4) <= "1111";
+            out_left(3 downto 0) <= "0000";
+            empty_left <= '0';
+        end if;
+        if abs(yMem_left) <= 240 AND abs(yMem_left)+4 >= 240 and abs(xMem_left) <= 320 then
+            out_left(11 downto 8) <= "0000";
+            out_left(7 downto 4) <= "1111";
+            out_left(3 downto 0) <= "0000";
+            empty_left <= '0';
+        end if;
+        
         a2_right := xMem_right - x_index;
         b2_right := yMem_right - y_index;
         a2_right := a2_right**2;
@@ -83,20 +98,31 @@ begin
         b2_left := b2_left**2;
         c2_left := a2_left + b2_left;
         
+        if abs(xMem_right) <= 320 AND abs(xMem_right)+4 >= 320 and abs(yMem_right) <= 240 then
+            out_right(11 downto 8) <= "0000";
+            out_right(7 downto 4) <= "1111";
+            out_right(3 downto 0) <= "0000";
+            empty_right <= '0';
+        end if;
+        if abs(yMem_right) <= 240 AND abs(yMem_right)+4 >= 240 and abs(xMem_right) <= 320 then
+            out_right(11 downto 8) <= "0000";
+            out_right(7 downto 4) <= "0000";
+            out_right(3 downto 0) <= "1111";
+            empty_right <= '0';
+        end if;
+        
         if(c2_left <= size_bal) then
                 out_left(11 downto 8) <= "0000";
                 out_left(7 downto 4) <= "0000";
                 out_left(3 downto 0) <= "1111";
-                empty_left <= '0';
-        else
-                empty_left <= '1'; 
+                empty_left <= '0'; 
         end if;
         
         if(c2_right <= size_bal) then
-                out_right(11 downto 8) <= "0000";
-                out_right(7 downto 4) <= "1111";
+                out_right(11 downto 8) <= "1111";
+                out_right(7 downto 4) <= "0000";
                 out_right(3 downto 0) <= "0000";
-                empty_right <= '0'; 
+                empty_right <= '0';
         else
                 empty_right <= '1';
         end if;
